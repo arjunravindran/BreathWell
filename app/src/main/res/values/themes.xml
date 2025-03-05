@@ -1,0 +1,29 @@
+<resources>
+    <!-- Base application theme -->
+    <style name="Theme.BreathWell" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- Primary brand color -->
+        <item name="colorPrimary">@color/cyan_500</item>
+        <item name="colorPrimaryVariant">@color/cyan_400</item>
+        <item name="colorOnPrimary">@color/white</item>
+
+        <!-- Secondary brand color -->
+        <item name="colorSecondary">@color/cyan_500</item>
+        <item name="colorSecondaryVariant">@color/cyan_400</item>
+        <item name="colorOnSecondary">@color/white</item>
+
+        <!-- Status bar color -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+
+        <!-- Text colors -->
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">#B0FFFFFF</item>
+    </style>
+
+    <!-- Theme without action bar for our main activity -->
+    <style name="Theme.BreathWell.NoActionBar" parent="Theme.BreathWell">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

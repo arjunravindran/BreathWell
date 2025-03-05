@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Background circle (very dark) -->
+    <path
+        android:pathData="M54,104A50,50 0,1 1,104 54,50 50,0 0,1 54,104z"
+        android:fillColor="#0A0A14"/>
+
+    <!-- Outer glow with simplified gradient implementation -->
+    <path
+        android:pathData="M54,94A40,40 0,1 1,94 54,40 40,0 0,1 54,94z"
+        android:fillColor="#00A6ED"
+        android:alpha="51"/> <!-- 0.2 opacity in Android's 0-255 scale -->
+
+    <!-- Blue pulse ring -->
+    <path
+        android:pathData="M54,90A36,36 0,1 1,90 54,36 36,0 0,1 54,90z"
+        android:strokeWidth="0.5"
+        android:strokeColor="#00A6ED"
+        android:fillColor="#00000000"
+        android:alpha="76"/> <!-- 0.3 opacity -->
+
+    <!-- Green pulse ring -->
+    <path
+        android:pathData="M54,86A32,32 0,1 1,86 54,32 32,0 0,1 54,86z"
+        android:strokeWidth="0.5"
+        android:strokeColor="#00D084"
+        android:fillColor="#00000000"
+        android:alpha="76"/> <!-- 0.3 opacity -->
+
+    <!-- Main HAL eye outer circle (blue) -->
+    <path
+        android:pathData="M54,82A28,28 0,1 1,82 54,28 28,0 0,1 54,82z"
+        android:fillColor="#00A6ED"/>
+
+    <!-- HAL eye inner circle (darker blue) -->
+    <path
+        android:pathData="M54,70A16,16 0,1 1,70 54,16 16,0 0,1 54,70z"
+        android:fillColor="#0076AD"/>
+
+    <!-- Center highlight -->
+    <path
+        android:pathData="M54,57A3,3 0,1 1,57 54,3 3,0 0,1 54,57z"
+        android:fillColor="#FFFFFF"
+        android:alpha="102"/> <!-- 0.4 opacity -->
+</vector>
