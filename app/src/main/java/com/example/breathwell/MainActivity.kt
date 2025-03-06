@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
         setupBackPressHandling()
 
         // Check battery optimization
-        checkBatteryOptimization()
+        //checkBatteryOptimization()
 
         // Initialize reminders if enabled
         initializeReminders()
