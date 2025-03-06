@@ -69,6 +69,11 @@ class FragmentManager(
 
         // Update settings icon
         binding.settingsIcon.setImageResource(R.drawable.ic_close)
+
+        // Add click listener to close button
+        binding.settingsButton.setOnClickListener {
+            hideSettingsFragment()
+        }
     }
 
     /**
@@ -83,6 +88,13 @@ class FragmentManager(
 
         // Update settings icon
         binding.settingsIcon.setImageResource(R.drawable.ic_settings)
+
+        // Reset click listener to open settings
+        binding.settingsButton.setOnClickListener {
+            if (activity is com.example.breathwell.MainActivity) {
+                activity.showSettingsFragment()
+            }
+        }
     }
 
     /**
@@ -109,6 +121,11 @@ class FragmentManager(
 
         // Update header icon
         binding.habitTrackerIcon.setImageResource(R.drawable.ic_close)
+
+        // Add click listener to close button
+        binding.habitTrackerButton.setOnClickListener {
+            hideHabitTrackerFragment()
+        }
     }
 
     /**
@@ -123,6 +140,13 @@ class FragmentManager(
 
         // Update icon
         binding.habitTrackerIcon.setImageResource(R.drawable.ic_calendar)
+
+        // Reset click listener to open habit tracker
+        binding.habitTrackerButton.setOnClickListener {
+            if (activity is com.example.breathwell.MainActivity) {
+                activity.showHabitTrackerFragment()
+            }
+        }
     }
 
     /**
@@ -179,12 +203,12 @@ class FragmentManager(
      */
     private fun showBreathingContent() {
         binding.breathingContent.root.visibility = View.VISIBLE
-        if (activity.resources.configuration.orientation == 
+        if (activity.resources.configuration.orientation ==
             android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
             binding.breathingContentLand.root.visibility = View.VISIBLE
         }
     }
-    
+
     /**
      * Fragment types in the application
      */

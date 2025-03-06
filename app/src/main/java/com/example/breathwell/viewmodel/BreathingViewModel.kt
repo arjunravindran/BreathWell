@@ -8,6 +8,7 @@ import android.view.animation.LinearInterpolator
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
@@ -21,38 +22,61 @@ import java.time.LocalDate
 import kotlin.math.pow
 
 class BreathingViewModel(
-    private val repository: BreathingSessionRepository
+    private val repository: BreathingSessionRepository,
+    private val savedStateHandle: SavedStateHandle = SavedStateHandle()
 ) : ViewModel() {
+
+    // Keys for saved state
+    private companion object {
+        const val KEY_EXPANSION = "circle_expansion"
+        const val KEY_PULSE_EFFECT = "show_pulse_effect"
+        const val KEY_CIRCLE_STATE = "circle_state"
+        const val KEY_CURRENT_CYCLE = "current_cycle"
+        const val KEY_IS_RUNNING = "is_running"
+        const val KEY_PHASE = "breath_phase"
+    }
 
     // LiveData to observe in the UI
     private val _activePattern = MutableLiveData<BreathingPattern>(BreathingPattern.BOX_BREATHING)
     val activePattern: LiveData<BreathingPattern> = _activePattern
 
-    private val _breathPhase = MutableLiveData<BreathPhase>(BreathPhase.READY)
+    private val _breathPhase = MutableLiveData<BreathPhase>(
+        savedStateHandle.get(KEY_PHASE) ?: BreathPhase.READY
+    )
     val breathPhase: LiveData<BreathPhase> = _breathPhase
 
     private val _counter = MutableLiveData<Int>(0)
     val counter: LiveData<Int> = _counter
 
-    private val _isRunning = MutableLiveData<Boolean>(false)
+    private val _isRunning = MutableLiveData<Boolean>(
+        savedStateHandle.get(KEY_IS_RUNNING) ?: false
+    )
     val isRunning: LiveData<Boolean> = _isRunning
 
     private val _totalCycles = MutableLiveData<Int>(5)
     val totalCycles: LiveData<Int> = _totalCycles
 
-    private val _currentCycle = MutableLiveData<Int>(0)
+    private val _currentCycle = MutableLiveData<Int>(
+        savedStateHandle.get(KEY_CURRENT_CYCLE) ?: 0
+    )
     val currentCycle: LiveData<Int> = _currentCycle
 
     private val _customPattern = MutableLiveData<BreathingPattern>(BreathingPattern.CUSTOM)
     val customPattern: LiveData<BreathingPattern> = _customPattern
 
     // Expansion percentage for circle animation (0-100)
-    private val _circleExpansion = MutableLiveData<Float>(50f)
+    private val _circleExpansion = MutableLiveData<Float>(
+        savedStateHandle.get(KEY_EXPANSION) ?: 50f
+    )
     val circleExpansion: LiveData<Float> = _circleExpansion
 
     // Power saving mode
     private val _powerSavingMode = MutableLiveData<PowerSavingMode>(PowerSavingMode.NONE)
     val powerSavingMode: LiveData<PowerSavingMode> = _powerSavingMode
+
+    // Animation state properties for restoration
+    private var wasAnimatingBeforeStop = false
+    private var lastAnimationTimestamp = 0L
 
     // New properties for habit tracking
     private val _sessionCompleted = MutableLiveData<Boolean>(false)
@@ -65,6 +89,23 @@ class BreathingViewModel(
 
     // Circle animator
     private var circleAnimator: ValueAnimator? = null
+
+    /**
+     * Save animation state for restoration after config changes
+     */
+    fun saveAnimationState(expansion: Float, showPulseEffect: Boolean) {
+        savedStateHandle.set(KEY_EXPANSION, expansion)
+        savedStateHandle.set(KEY_PULSE_EFFECT, showPulseEffect)
+        savedStateHandle.set(KEY_CIRCLE_STATE, pulseScale)
+        savedStateHandle.set(KEY_CURRENT_CYCLE, _currentCycle.value)
+        savedStateHandle.set(KEY_IS_RUNNING, _isRunning.value)
+        savedStateHandle.set(KEY_PHASE, _breathPhase.value)
+    }
+
+    /**
+     * Animation state for restoring after config changes
+     */
+    private var pulseScale: Float = 1.0f
 
     // Set power saving mode
     fun setPowerSavingMode(mode: PowerSavingMode) {
@@ -84,28 +125,51 @@ class BreathingViewModel(
 
     private fun startBreathing() {
         _isRunning.value = true
-        _breathPhase.value = BreathPhase.READY
-        _currentCycle.value = 0
-        _sessionCompleted.value = false
+        savedStateHandle.set(KEY_IS_RUNNING, true)
+
+        // Only reset phase if not resuming from config change or if we're complete
+        if (_breathPhase.value == BreathPhase.READY || _breathPhase.value == BreathPhase.COMPLETE) {
+            _breathPhase.value = BreathPhase.READY
+            savedStateHandle.set(KEY_PHASE, BreathPhase.READY)
+            _currentCycle.value = 0
+            savedStateHandle.set(KEY_CURRENT_CYCLE, 0)
+            _sessionCompleted.value = false
+        }
+
         advanceToNextPhase()
     }
 
     private fun stopBreathing() {
+        wasAnimatingBeforeStop = timer != null || circleAnimator != null
         timer?.cancel()
+        timer = null
         circleAnimator?.cancel()
+        circleAnimator = null
+
+        // Save state before stopping
+        if (wasAnimatingBeforeStop) {
+            lastAnimationTimestamp = System.currentTimeMillis()
+            saveAnimationState(_circleExpansion.value ?: 50f,
+                _breathPhase.value == BreathPhase.INHALE || _breathPhase.value == BreathPhase.EXHALE)
+        }
+
         _isRunning.value = false
-        _breathPhase.value = BreathPhase.READY
-        _currentCycle.value = 0
-        _circleExpansion.value = 50f
+        savedStateHandle.set(KEY_IS_RUNNING, false)
     }
 
     private fun completeSession() {
         timer?.cancel()
+        timer = null
         circleAnimator?.cancel()
+        circleAnimator = null
         _isRunning.value = false
+        savedStateHandle.set(KEY_IS_RUNNING, false)
         _breathPhase.value = BreathPhase.COMPLETE
+        savedStateHandle.set(KEY_PHASE, BreathPhase.COMPLETE)
         _currentCycle.value = _totalCycles.value ?: 0
+        savedStateHandle.set(KEY_CURRENT_CYCLE, _currentCycle.value)
         _circleExpansion.value = 50f
+        savedStateHandle.set(KEY_EXPANSION, 50f)
 
         // Mark today's session as complete in the database
         saveSessionToDatabase()
@@ -166,39 +230,47 @@ class BreathingViewModel(
             completeSession()
         } else {
             _currentCycle.value = currentCycleValue + 1
+            savedStateHandle.set(KEY_CURRENT_CYCLE, _currentCycle.value)
             startInhalePhase()
         }
     }
 
     private fun startInhalePhase() {
         _breathPhase.value = BreathPhase.INHALE
+        savedStateHandle.set(KEY_PHASE, BreathPhase.INHALE)
         startCountdown(_activePattern.value?.inhale ?: 4)
         animateCircle(30f, 95f, _activePattern.value?.inhale?.times(1000L) ?: 4000L)
     }
 
     private fun startHold1Phase() {
         _breathPhase.value = BreathPhase.HOLD1
+        savedStateHandle.set(KEY_PHASE, BreathPhase.HOLD1)
         startCountdown(_activePattern.value?.hold1 ?: 0)
         // Keep expanded at 95%
         _circleExpansion.value = 95f
+        savedStateHandle.set(KEY_EXPANSION, 95f)
     }
 
     private fun startExhalePhase() {
         _breathPhase.value = BreathPhase.EXHALE
+        savedStateHandle.set(KEY_PHASE, BreathPhase.EXHALE)
         startCountdown(_activePattern.value?.exhale ?: 4)
         animateCircle(95f, 30f, _activePattern.value?.exhale?.times(1000L) ?: 4000L)
     }
 
     private fun startHold2Phase() {
         _breathPhase.value = BreathPhase.HOLD2
+        savedStateHandle.set(KEY_PHASE, BreathPhase.HOLD2)
         startCountdown(_activePattern.value?.hold2 ?: 0)
         // Keep contracted at 30%
         _circleExpansion.value = 30f
+        savedStateHandle.set(KEY_EXPANSION, 30f)
     }
 
     private fun animateCircle(from: Float, to: Float, duration: Long) {
         // Cancel any running animation
         circleAnimator?.cancel()
+        circleAnimator = null
 
         // Make the range wider for more dramatic effect
         val adjustedFrom = if (from < 50f) from * 0.8f else from  // Inhale starts from smaller size
@@ -216,6 +288,7 @@ class BreathingViewModel(
             this.duration = adjustedDuration.toLong()
             addUpdateListener { animation ->
                 _circleExpansion.value = animation.animatedValue as Float
+                savedStateHandle.set(KEY_EXPANSION, _circleExpansion.value)
             }
 
             // Use AccelerateDecelerateInterpolator for smoother start/stop
@@ -228,6 +301,7 @@ class BreathingViewModel(
         _counter.value = seconds
 
         timer?.cancel()
+        timer = null
 
         // Adjust tick frequency based on power saving mode
         val tickInterval = when (_powerSavingMode.value) {
@@ -350,6 +424,8 @@ class BreathingViewModel(
     override fun onCleared() {
         super.onCleared()
         timer?.cancel()
+        timer = null
         circleAnimator?.cancel()
+        circleAnimator = null
     }
 }

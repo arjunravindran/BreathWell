@@ -6,11 +6,8 @@ import android.content.res.Configuration
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.breathwell.MainActivity
@@ -18,6 +15,7 @@ import com.example.breathwell.R
 import com.example.breathwell.databinding.ActivityMainBinding
 import com.example.breathwell.model.BreathPhase
 import com.example.breathwell.model.BreathingPattern
+import com.example.breathwell.ui.views.CustomNumberSlider
 import com.example.breathwell.utils.AccessibilityUtils
 import com.example.breathwell.viewmodel.BreathingViewModel
 
@@ -52,95 +50,22 @@ class BreathingUIController(
     }
 
     /**
-     * Set up the cycles text input control
+     * Set up the cycles slider control
      */
     fun setupCyclesControl() {
-        // Get references to the input field and plus/minus buttons
-        val cyclesInput = when {
-            binding.breathingContent.root.visibility == View.VISIBLE -> binding.breathingContent.cyclesInput
-            else -> binding.breathingContentLand.cyclesInput
-        }
-
-        val increaseButton = when {
-            binding.breathingContent.root.visibility == View.VISIBLE -> binding.breathingContent.increaseCyclesButton
-            else -> binding.breathingContentLand.increaseCyclesButton
-        }
-
-        val decreaseButton = when {
-            binding.breathingContent.root.visibility == View.VISIBLE -> binding.breathingContent.decreaseCyclesButton
-            else -> binding.breathingContentLand.decreaseCyclesButton
-        }
+        // Get reference to the slider
+        val cyclesSlider = getCurrentCyclesSlider() ?: return
 
         // Set initial value
-        cyclesInput.setText(viewModel.totalCycles.value?.toString() ?: "5")
+        cyclesSlider.value = viewModel.totalCycles.value?.toFloat() ?: 5f
 
-        // Setup increase button
-        increaseButton.setOnClickListener {
-            val currentValue = cyclesInput.text.toString().toIntOrNull() ?: 5
-            if (currentValue < 10) { // Max 10 cycles
-                val newValue = currentValue + 1
-                cyclesInput.setText(newValue.toString())
-                viewModel.setTotalCycles(newValue)
-            }
-        }
-
-        // Setup decrease button
-        decreaseButton.setOnClickListener {
-            val currentValue = cyclesInput.text.toString().toIntOrNull() ?: 5
-            if (currentValue > 1) { // Min 1 cycle
-                val newValue = currentValue - 1
-                cyclesInput.setText(newValue.toString())
-                viewModel.setTotalCycles(newValue)
-            }
-        }
-
-        // Setup direct text input handling
-        cyclesInput.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                handleCyclesInputChange(cyclesInput)
-                true
-            } else {
-                false
-            }
-        }
-
-        // Handle focus change
-        cyclesInput.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                handleCyclesInputChange(cyclesInput)
-            }
-        }
-    }
-
-    private fun handleCyclesInputChange(cyclesInput: EditText) {
-        val inputText = cyclesInput.text.toString()
-        val cycles = inputText.toIntOrNull()
-
-        when {
-            cycles == null -> {
-                // Invalid input, reset to default
-                cyclesInput.setText("5")
-                viewModel.setTotalCycles(5)
-            }
-            cycles < 1 -> {
-                // Below minimum
-                cyclesInput.setText("1")
-                viewModel.setTotalCycles(1)
-            }
-            cycles > 10 -> {
-                // Above maximum
-                cyclesInput.setText("10")
-                viewModel.setTotalCycles(10)
-            }
-            else -> {
-                // Valid input
+        // Setup slider change listener
+        cyclesSlider.addOnChangeListener { _, value, fromUser ->
+            if (fromUser) {
+                val cycles = value.toInt()
                 viewModel.setTotalCycles(cycles)
             }
         }
-
-        // Hide keyboard
-        val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(cyclesInput.windowToken, 0)
     }
 
     /**
@@ -217,6 +142,15 @@ class BreathingUIController(
                 activity.getString(if (viewModel.isRunning.value == true) R.string.accessibility_stop_session else R.string.accessibility_start_session)
             )
         }
+
+        // Setup accessibility for the slider
+        getCurrentCyclesSlider()?.let { slider ->
+            AccessibilityUtils.setupAccessibilityForButton(
+                slider,
+                activity.getString(R.string.cycles),
+                activity.getString(R.string.accessibility_cycles_slider)
+            )
+        }
     }
 
     /**
@@ -268,7 +202,7 @@ class BreathingUIController(
 
         // Update cycle counts
         viewModel.totalCycles.observe(activity) { cycles ->
-            getCurrentCyclesInput()?.setText(cycles.toString())
+            getCurrentCyclesSlider()?.value = cycles.toFloat()
             getCurrentProgressRing()?.totalCycles = cycles
         }
 
@@ -315,9 +249,7 @@ class BreathingUIController(
         val button = getCurrentActionButton() ?: return
         val circularButton = getCurrentCircularActionButton() ?: return
         val spinner = getCurrentPatternSpinner() ?: return
-        val cyclesInput = getCurrentCyclesInput() ?: return
-        val increaseButton = getCurrentIncreaseButton() ?: return
-        val decreaseButton = getCurrentDecreaseButton() ?: return
+        val cyclesSlider = getCurrentCyclesSlider() ?: return
 
         if (isRunning) {
             // Original button styling (still needed for accessibility)
@@ -331,9 +263,7 @@ class BreathingUIController(
 
             // Disable controls during session
             spinner.isEnabled = false
-            cyclesInput.isEnabled = false
-            increaseButton.isEnabled = false
-            decreaseButton.isEnabled = false
+            cyclesSlider.isEnabled = false
 
             // Update accessibility
             AccessibilityUtils.setupAccessibilityForButton(
@@ -363,9 +293,7 @@ class BreathingUIController(
 
             // Enable controls when not in session
             spinner.isEnabled = true
-            cyclesInput.isEnabled = true
-            increaseButton.isEnabled = true
-            decreaseButton.isEnabled = true
+            cyclesSlider.isEnabled = true
 
             // Update accessibility
             AccessibilityUtils.setupAccessibilityForButton(
@@ -396,7 +324,7 @@ class BreathingUIController(
         }
 
         viewModel.totalCycles.value?.let { cycles ->
-            getCurrentCyclesInput()?.setText(cycles.toString())
+            getCurrentCyclesSlider()?.value = cycles.toFloat()
         }
 
         viewModel.breathPhase.value?.let { phase ->
@@ -415,19 +343,9 @@ class BreathingUIController(
         else -> binding.breathingContentLand.patternSpinnerView
     }
 
-    private fun getCurrentCyclesInput() = when {
-        binding.breathingContent.root.visibility == View.VISIBLE -> binding.breathingContent.cyclesInput
-        else -> binding.breathingContentLand.cyclesInput
-    }
-
-    private fun getCurrentIncreaseButton() = when {
-        binding.breathingContent.root.visibility == View.VISIBLE -> binding.breathingContent.increaseCyclesButton
-        else -> binding.breathingContentLand.increaseCyclesButton
-    }
-
-    private fun getCurrentDecreaseButton() = when {
-        binding.breathingContent.root.visibility == View.VISIBLE -> binding.breathingContent.decreaseCyclesButton
-        else -> binding.breathingContentLand.decreaseCyclesButton
+    private fun getCurrentCyclesSlider() = when {
+        binding.breathingContent.root.visibility == View.VISIBLE -> binding.breathingContent.cyclesSlider as? CustomNumberSlider
+        else -> binding.breathingContentLand.cyclesSlider as? CustomNumberSlider
     }
 
     private fun getCurrentActionButton() = when {

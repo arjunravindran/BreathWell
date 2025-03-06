@@ -8,6 +8,8 @@ import android.graphics.Paint
 import android.graphics.RadialGradient
 import android.graphics.Shader
 import android.graphics.Typeface
+import android.os.Parcel
+import android.os.Parcelable
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
@@ -71,6 +73,7 @@ class HALCircleView @JvmOverloads constructor(
     private var pulseScale = 1.0f
     private var animationQuality = AnimationQuality.FULL
     private var animationDuration = 1500L // Default animation duration
+    private var wasAnimating = false
 
     var expansion: Float = 50f
         set(value) {
@@ -106,14 +109,16 @@ class HALCircleView @JvmOverloads constructor(
 
     var showPulseEffect: Boolean = false
         set(value) {
-            field = value
-            if (value) {
-                startPulseAnimation()
-            } else {
-                pulseAnimator?.cancel()
-                pulseScale = 1.0f
+            if (field != value) {
+                field = value
+                if (value) {
+                    startPulseAnimation()
+                } else {
+                    pulseAnimator?.cancel()
+                    pulseScale = 1.0f
+                }
+                invalidate()
             }
-            invalidate()
         }
 
     // Set animation quality based on power saving mode
@@ -145,6 +150,23 @@ class HALCircleView @JvmOverloads constructor(
         if (showPulseEffect) {
             pulseAnimator?.cancel()
             startPulseAnimation()
+        }
+    }
+
+    /**
+     * Pause all ongoing animations
+     */
+    fun pauseAnimations() {
+        wasAnimating = pulseAnimator?.isRunning ?: false
+        pulseAnimator?.pause()
+    }
+
+    /**
+     * Resume animations if they were running before
+     */
+    fun resumeAnimations() {
+        if (wasAnimating) {
+            pulseAnimator?.resume()
         }
     }
 
@@ -246,5 +268,77 @@ class HALCircleView @JvmOverloads constructor(
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         pulseAnimator?.cancel()
+        pulseAnimator = null
+    }
+
+    override fun onSaveInstanceState(): Parcelable {
+        val superState = super.onSaveInstanceState()
+        val savedState = SavedState(superState)
+        savedState.expansion = expansion
+        savedState.breathColor = breathColor
+        savedState.innerColor = innerColor
+        savedState.counter = counter
+        savedState.instruction = instruction
+        savedState.showPulseEffect = showPulseEffect
+        savedState.pulseScale = pulseScale
+        return savedState
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        when (state) {
+            is SavedState -> {
+                super.onRestoreInstanceState(state.superState)
+                expansion = state.expansion
+                breathColor = state.breathColor
+                innerColor = state.innerColor
+                counter = state.counter
+                instruction = state.instruction
+                pulseScale = state.pulseScale
+                // Don't immediately start animation, will be handled by showPulseEffect setter
+                this.showPulseEffect = state.showPulseEffect
+            }
+            else -> super.onRestoreInstanceState(state)
+        }
+    }
+
+    private class SavedState : BaseSavedState {
+        var expansion: Float = 50f
+        var breathColor: Int = Color.parseColor("#00A6ED")
+        var innerColor: Int = Color.parseColor("#0076AD")
+        var counter: Int = 0
+        var instruction: String = "READY"
+        var showPulseEffect: Boolean = false
+        var pulseScale: Float = 1.0f
+
+        constructor(superState: Parcelable?) : super(superState)
+
+        constructor(parcel: Parcel) : super(parcel) {
+            expansion = parcel.readFloat()
+            breathColor = parcel.readInt()
+            innerColor = parcel.readInt()
+            counter = parcel.readInt()
+            instruction = parcel.readString() ?: "READY"
+            showPulseEffect = parcel.readInt() == 1
+            pulseScale = parcel.readFloat()
+        }
+
+        override fun writeToParcel(out: Parcel, flags: Int) {
+            super.writeToParcel(out, flags)
+            out.writeFloat(expansion)
+            out.writeInt(breathColor)
+            out.writeInt(innerColor)
+            out.writeInt(counter)
+            out.writeString(instruction)
+            out.writeInt(if (showPulseEffect) 1 else 0)
+            out.writeFloat(pulseScale)
+        }
+
+        companion object {
+            @JvmField
+            val CREATOR = object : Parcelable.Creator<SavedState> {
+                override fun createFromParcel(source: Parcel): SavedState = SavedState(source)
+                override fun newArray(size: Int): Array<SavedState?> = arrayOfNulls(size)
+            }
+        }
     }
 }

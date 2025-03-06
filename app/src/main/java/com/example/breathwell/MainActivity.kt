@@ -78,6 +78,9 @@ class MainActivity : AppCompatActivity() {
         powerSavingManager = PowerSavingManager(this, viewModel)
         animationManager = AnimationManager(binding, viewModel)
 
+        // Add animation manager as lifecycle observer for proper state handling
+        lifecycle.addObserver(animationManager)
+
         // Set up power saving mode adaptations
         powerSavingManager.setupPowerSavingMode()
     }
@@ -131,6 +134,29 @@ class MainActivity : AppCompatActivity() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         orientationManager.handleConfigurationChange(newConfig)
+
+        // Restore animation state after configuration change
+        animationManager.restoreAnimationState()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Refresh UI state when returning to the app
+        breathingUIController.refreshUIState()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        // Clean up resources
+        if (::animationManager.isInitialized) {
+            lifecycle.removeObserver(animationManager)
+            animationManager.cleanup()
+        }
+
+        if (::powerSavingManager.isInitialized) {
+            powerSavingManager.cleanup()
+        }
     }
 
     // Public methods for fragment interaction
