@@ -27,7 +27,7 @@
     <string name="this_week">This Week</string>
     <string name="this_month">This Month</string>
     <string name="previous_month">Previous Month</string>
-    <string name="next_month">Next Moonth</string>
+    <string name="next_moonth">Next Moonth</string>
 
     <!-- Reminder Strings -->
     <string name="daily_reminders">Daily Reminders</string>

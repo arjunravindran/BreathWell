@@ -504,6 +504,10 @@ class MainActivity : AppCompatActivity() {
             reminderSettingsFragment = null
         }
 
+        // Hide the breathing content
+        binding.breathingContent.root.visibility = View.GONE
+        binding.breathingContentLand.root.visibility = View.GONE
+
         // Create and show the settings fragment
         settingsFragment = SettingsFragment()
 
@@ -545,6 +549,10 @@ class MainActivity : AppCompatActivity() {
             reminderSettingsFragment = null
         }
 
+        // Hide the breathing content
+        binding.breathingContent.root.visibility = View.GONE
+        binding.breathingContentLand.root.visibility = View.GONE
+
         // Create and show the habit tracker fragment
         habitTrackerFragment = HabitTrackerFragment()
 
@@ -561,8 +569,11 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.popBackStack()
         habitTrackerFragment = null
 
-        // Show the main content
-        binding.contentContainer.visibility = View.VISIBLE
+        // Show the main content again
+        binding.breathingContent.root.visibility = View.VISIBLE
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            binding.breathingContentLand.root.visibility = View.VISIBLE
+        }
 
         // Update icon
         binding.habitTrackerIcon.setImageResource(R.drawable.ic_calendar)
@@ -582,6 +593,10 @@ class MainActivity : AppCompatActivity() {
         if (habitTrackerFragment != null && habitTrackerFragment!!.isVisible) {
             hideHabitTrackerFragment()
         }
+
+        // Hide the breathing content
+        binding.breathingContent.root.visibility = View.GONE
+        binding.breathingContentLand.root.visibility = View.GONE
 
         // Create and show the reminder settings fragment
         reminderSettingsFragment = ReminderSettingsFragment()
