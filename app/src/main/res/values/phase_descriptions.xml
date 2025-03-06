@@ -1,0 +1,9 @@
+<resources>
+    <!-- Phase descriptions for landscape mode -->
+    <string name="inhale_description">Breathe in slowly through your nose, filling your lungs from the bottom up</string>
+    <string name="hold_after_inhale_description">Hold your breath comfortably. Allow oxygen to circulate</string>
+    <string name="exhale_description">Release your breath slowly through your mouth</string>
+    <string name="hold_after_exhale_description">Pause briefly before your next breath</string>
+    <string name="ready_description">Prepare for your breathing session</string>
+    <string name="complete_description">Well done! You have completed your breathing session</string>
+</resources>

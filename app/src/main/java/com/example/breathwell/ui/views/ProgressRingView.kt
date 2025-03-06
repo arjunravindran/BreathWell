@@ -5,11 +5,12 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
-import android.graphics.Typeface
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
 import kotlin.math.min
+import androidx.core.graphics.toColorInt
+import androidx.core.graphics.withRotation
 
 class ProgressRingView @JvmOverloads constructor(
     context: Context,
@@ -18,25 +19,18 @@ class ProgressRingView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
 
     private val backgroundPaint = Paint().apply {
-        color = Color.parseColor("#333333") // Dark gray
+        color = "#333333".toColorInt() // Dark gray
         style = Paint.Style.STROKE
-        strokeWidth = dpToPx(3f)
+        strokeWidth = dpToPx(5f) // Thicker stroke
         isAntiAlias = true
+        alpha = 80 // 30% opacity
     }
 
     private val progressPaint = Paint().apply {
-        color = Color.parseColor("#38E1FF") // Cyan
+        color = "#38E1FF".toColorInt() // Cyan
         style = Paint.Style.STROKE
-        strokeWidth = dpToPx(3f)
+        strokeWidth = dpToPx(5f) // Thicker stroke
         strokeCap = Paint.Cap.ROUND
-        isAntiAlias = true
-    }
-
-    private val textPaint = Paint().apply {
-        color = Color.WHITE
-        textAlign = Paint.Align.CENTER
-        textSize = spToPx(12f)
-        typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
         isAntiAlias = true
     }
 
@@ -58,14 +52,6 @@ class ProgressRingView @JvmOverloads constructor(
         return TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
             dp,
-            context.resources.displayMetrics
-        )
-    }
-
-    private fun spToPx(sp: Float): Float {
-        return TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_SP,
-            sp,
             context.resources.displayMetrics
         )
     }
@@ -92,14 +78,11 @@ class ProgressRingView @JvmOverloads constructor(
         canvas.drawCircle(centerX, centerY, radius, backgroundPaint)
 
         // Draw progress arc
-        canvas.save()
-        canvas.rotate(-90f, centerX, centerY) // Start from top
-        canvas.drawArc(rect, 0f, progressAngle, false, progressPaint)
-        canvas.restore()
+        canvas.withRotation(-90f, centerX, centerY) {
+            drawArc(rect, 0f, progressAngle, false, progressPaint)
+        }
 
-        // Draw text
-        val text = "${currentCycle + 1}/$totalCycles"
-        canvas.drawText(text, centerX, centerY + textPaint.textSize / 3, textPaint)
+        // No text is drawn anymore
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {

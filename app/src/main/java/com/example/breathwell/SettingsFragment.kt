@@ -1,5 +1,6 @@
 package com.example.breathwell
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.breathwell.databinding.FragmentSettingsBinding
+import com.example.breathwell.notification.ReminderNotificationHelper
 import com.example.breathwell.viewmodel.BreathingViewModel
 
 class SettingsFragment : Fragment() {
@@ -15,6 +17,7 @@ class SettingsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var viewModel: BreathingViewModel
+    private lateinit var reminderHelper: ReminderNotificationHelper
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,12 +32,14 @@ class SettingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewModel = ViewModelProvider(requireActivity())[BreathingViewModel::class.java]
+        reminderHelper = ReminderNotificationHelper(requireContext())
 
-        populateInitialValues()
+        setupBreathingSettings()
+        setupReminderSettings()
         setupApplyButton()
     }
 
-    private fun populateInitialValues() {
+    private fun setupBreathingSettings() {
         val customPattern = viewModel.customPattern.value ?: return
 
         binding.inhaleInput.setText(customPattern.inhale.toString())
@@ -43,8 +48,30 @@ class SettingsFragment : Fragment() {
         binding.hold2Input.setText(customPattern.hold2.toString())
     }
 
+    private fun setupReminderSettings() {
+        // Load current settings
+        val sharedPrefs = requireActivity().getSharedPreferences("breathwell_prefs", Context.MODE_PRIVATE)
+        val isEnabled = sharedPrefs.getBoolean("reminder_enabled", false)
+        val hour = sharedPrefs.getInt("reminder_hour", 20) // Default: 8 PM
+        val minute = sharedPrefs.getInt("reminder_minute", 0)
+
+        // Set UI state
+        binding.reminderSwitch.isChecked = isEnabled
+        binding.timePickerCard.visibility = if (isEnabled) View.VISIBLE else View.GONE
+
+        // Set time picker
+        binding.timePicker.hour = hour
+        binding.timePicker.minute = minute
+
+        // Setup toggle switch
+        binding.reminderSwitch.setOnCheckedChangeListener { _, isChecked ->
+            binding.timePickerCard.visibility = if (isChecked) View.VISIBLE else View.GONE
+        }
+    }
+
     private fun setupApplyButton() {
         binding.applyButton.setOnClickListener {
+            // Apply breathing pattern settings
             val inhaleText = binding.inhaleInput.text.toString()
             val hold1Text = binding.hold1Input.text.toString()
             val exhaleText = binding.exhaleInput.text.toString()
@@ -58,8 +85,33 @@ class SettingsFragment : Fragment() {
             viewModel.updateCustomPattern(inhale, hold1, exhale, hold2)
             viewModel.setActivePattern(viewModel.customPattern.value!!)
 
+            // Apply reminder settings
+            val isEnabled = binding.reminderSwitch.isChecked
+            val hour = binding.timePicker.hour
+            val minute = binding.timePicker.minute
+
+            // Save settings
+            saveReminderSettings(isEnabled, hour, minute)
+
+            // Schedule or cancel reminder
+            if (isEnabled) {
+                reminderHelper.scheduleDaily(hour, minute)
+            } else {
+                reminderHelper.cancelReminder()
+            }
+
             // Close settings and return to main screen
             requireActivity().supportFragmentManager.popBackStack()
+        }
+    }
+
+    private fun saveReminderSettings(isEnabled: Boolean, hour: Int, minute: Int) {
+        val sharedPrefs = requireActivity().getSharedPreferences("breathwell_prefs", Context.MODE_PRIVATE)
+        sharedPrefs.edit().apply {
+            putBoolean("reminder_enabled", isEnabled)
+            putInt("reminder_hour", hour)
+            putInt("reminder_minute", minute)
+            apply()
         }
     }
 

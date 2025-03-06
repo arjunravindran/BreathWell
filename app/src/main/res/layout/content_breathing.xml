@@ -1,20 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- HAL Circle View -->
-    <com.example.breathwell.ui.views.HALCircleView
-        android:id="@+id/halCircleView"
+    <!-- Breathing Circle Container -->
+    <FrameLayout
+        android:id="@+id/circleContainer"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
-        android:layout_marginBottom="48dp"
+        android:layout_marginBottom="80dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/patternLabel" />
+        app:layout_constraintBottom_toTopOf="@id/patternLabel">
+
+        <!-- Cycle Progress Ring - 20% smaller through scaling -->
+        <com.example.breathwell.ui.views.ProgressRingView
+            android:id="@+id/cycleProgressRing"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+             />
+
+        <!-- HAL Circle View - 20% bigger through scaling -->
+        <com.example.breathwell.ui.views.HALCircleView
+            android:id="@+id/halCircleView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:scaleX="1.2"
+            android:scaleY="1.2" />
+    </FrameLayout>
 
     <!-- Pattern Selection -->
     <TextView

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -126,10 +127,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Main breathing screen - will be replaced by settings when needed -->
+        <!-- Main breathing screen for portrait mode -->
         <include
             android:id="@+id/breathingContent"
             layout="@layout/content_breathing" />
+
+        <!-- Main breathing screen for landscape mode -->
+        <include
+            android:id="@+id/breathingContentLand"
+            layout="@layout/content_breathing_land"
+            android:visibility="gone" />
 
     </FrameLayout>
 

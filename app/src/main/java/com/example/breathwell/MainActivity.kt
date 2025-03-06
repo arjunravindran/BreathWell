@@ -2,6 +2,7 @@ package com.example.breathwell
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.content.res.Configuration
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.TransitionDrawable
 import android.os.Bundle
@@ -17,14 +18,20 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.breathwell.databinding.ActivityMainBinding
 import com.example.breathwell.model.BreathPhase
 import com.example.breathwell.model.BreathingPattern
 import com.example.breathwell.notification.ReminderNotificationHelper
 import com.example.breathwell.ui.views.HALCircleView
 import com.example.breathwell.ui.views.ProgressRingView
+import com.example.breathwell.utils.AccessibilityUtils
+import com.example.breathwell.utils.AnimationQuality
+import com.example.breathwell.utils.BatteryOptimizationUtils
+import com.example.breathwell.utils.PowerSavingMode
 import com.example.breathwell.viewmodel.BreathingViewModel
 import com.example.breathwell.viewmodel.BreathingViewModelFactory
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -36,6 +43,10 @@ class MainActivity : AppCompatActivity() {
     private var reminderSettingsFragment: ReminderSettingsFragment? = null
 
     private val breathingPatternAdapter by lazy { BreathingPatternAdapter(this) }
+
+    // Power saving mode tracking
+    private var currentPowerSavingMode = PowerSavingMode.NONE
+    private var currentAnimationQuality = AnimationQuality.FULL
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,10 +64,19 @@ class MainActivity : AppCompatActivity() {
             BreathingViewModelFactory(application)
         )[BreathingViewModel::class.java]
 
+        // Check and request battery optimization exemption
+        lifecycleScope.launch {
+            BatteryOptimizationUtils.requestDisableBatteryOptimization(this@MainActivity)
+        }
+
+        // Setup power saving mode adjustments
+        setupPowerSavingMode()
+
         // Setup UI components
         setupPatternSpinner()
         setupCyclesSeekBar()
         setupButtons()
+        setupAccessibility()
 
         // Observe view model state
         observeViewModelState()
@@ -66,6 +86,147 @@ class MainActivity : AppCompatActivity() {
 
         // Initialize daily reminders if enabled
         initializeReminders()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        // Handle orientation changes
+        when (newConfig.orientation) {
+            Configuration.ORIENTATION_LANDSCAPE -> {
+                // Switch to landscape layout
+                binding.breathingContent.root.visibility = View.GONE
+                binding.breathingContentLand.root.visibility = View.VISIBLE
+
+                // Update the references to views in the new layout
+                updateViewReferencesForCurrentLayout()
+            }
+            else -> {
+                // Switch to portrait layout
+                binding.breathingContent.root.visibility = View.VISIBLE
+                binding.breathingContentLand.root.visibility = View.GONE
+
+                // Update the references to views in the new layout
+                updateViewReferencesForCurrentLayout()
+            }
+        }
+    }
+
+    private fun updateViewReferencesForCurrentLayout() {
+        // Re-setup UI components for current orientation
+        setupPatternSpinner()
+        setupCyclesSeekBar()
+        setupButtons()
+        setupAccessibility()
+
+        // Refresh UI state from ViewModel
+        refreshUIFromViewModel()
+    }
+
+    private fun refreshUIFromViewModel() {
+        // Apply current ViewModel state to UI
+        viewModel.activePattern.value?.let { pattern ->
+            val position = breathingPatternAdapter.getPosition(pattern)
+            if (position >= 0) {
+                getCurrentPatternSpinner()?.setSelection(position)
+            }
+        }
+
+        viewModel.totalCycles.value?.let { cycles ->
+            getCurrentCyclesSeekBar()?.progress = cycles - 1
+            getCurrentCyclesTextView()?.text = cycles.toString()
+        }
+
+        viewModel.breathPhase.value?.let { phase ->
+            updatePhaseUI(phase)
+        }
+
+        viewModel.isRunning.value?.let { isRunning ->
+            updateActionButtonState(isRunning)
+        }
+    }
+
+    private fun getCurrentPatternSpinner() = when {
+        binding.breathingContent.root.visibility == View.VISIBLE -> binding.breathingContent.patternSpinnerView
+        else -> binding.breathingContentLand.patternSpinnerView
+    }
+
+    private fun getCurrentCyclesSeekBar() = when {
+        binding.breathingContent.root.visibility == View.VISIBLE -> binding.breathingContent.cyclesSeekBar
+        else -> binding.breathingContentLand.cyclesSeekBar
+    }
+
+    private fun getCurrentCyclesTextView() = when {
+        binding.breathingContent.root.visibility == View.VISIBLE -> binding.breathingContent.cyclesValue
+        else -> binding.breathingContentLand.cyclesValue
+    }
+
+    private fun getCurrentActionButton() = when {
+        binding.breathingContent.root.visibility == View.VISIBLE -> binding.breathingContent.actionButton
+        else -> binding.breathingContentLand.actionButton
+    }
+
+    private fun getCurrentHALCircleView() = when {
+        binding.breathingContent.root.visibility == View.VISIBLE -> binding.breathingContent.halCircleView
+        else -> binding.breathingContentLand.halCircleView
+    }
+
+    private fun setupPowerSavingMode() {
+        // Determine current power saving mode
+        currentPowerSavingMode = BatteryOptimizationUtils.adaptToPowerSaving(this)
+        currentAnimationQuality = BatteryOptimizationUtils.getAnimationQuality(currentPowerSavingMode)
+
+        // Pass power saving status to view model
+        viewModel.setPowerSavingMode(currentPowerSavingMode)
+
+        // Set initial animation quality for HAL circle view
+        getCurrentHALCircleView().setAnimationQuality(currentAnimationQuality)
+    }
+
+    private fun setupAccessibility() {
+        // Set content descriptions for buttons
+        AccessibilityUtils.setupAccessibilityForButton(
+            binding.settingsButton,
+            getString(R.string.settings),
+            getString(R.string.accessibility_open_settings)
+        )
+
+        AccessibilityUtils.setupAccessibilityForButton(
+            binding.habitTrackerButton,
+            getString(R.string.habit_tracker),
+            getString(R.string.accessibility_open_habit_tracker)
+        )
+
+        AccessibilityUtils.setupAccessibilityForButton(
+            binding.reminderButton,
+            getString(R.string.daily_reminders),
+            getString(R.string.accessibility_open_reminders)
+        )
+
+        // Set content descriptions for icons
+        AccessibilityUtils.setContentDescription(
+            binding.settingsIcon,
+            getString(R.string.settings)
+        )
+
+        AccessibilityUtils.setContentDescription(
+            binding.habitTrackerIcon,
+            getString(R.string.habit_tracker)
+        )
+
+        AccessibilityUtils.setContentDescription(
+            binding.reminderIcon,
+            getString(R.string.daily_reminders)
+        )
+
+        // Setup accessibility for current action button
+        getCurrentActionButton()?.let { button ->
+            AccessibilityUtils.setupAccessibilityForButton(
+                button,
+                getString(if (viewModel.isRunning.value == true) R.string.stop else R.string.start),
+                getString(if (viewModel.isRunning.value == true) R.string.accessibility_stop_session else R.string.accessibility_start_session)
+            )
+        }
     }
 
     private fun initializeReminders() {
@@ -105,7 +266,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupPatternSpinner() {
-        val spinner = binding.breathingContent.patternSpinnerView
+        val spinner = getCurrentPatternSpinner() ?: return
         spinner.adapter = breathingPatternAdapter
 
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -121,11 +282,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupCyclesSeekBar() {
-        val seekBar = binding.breathingContent.cyclesSeekBar
+        val seekBar = getCurrentCyclesSeekBar() ?: return
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 val cycles = progress + 1
-                binding.breathingContent.cyclesValue.text = cycles.toString()
+                getCurrentCyclesTextView()?.text = cycles.toString()
                 if (fromUser) {
                     viewModel.setTotalCycles(cycles)
                 }
@@ -143,7 +304,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupButtons() {
         // Action button (Start/Stop)
-        binding.breathingContent.actionButton.setOnClickListener {
+        getCurrentActionButton()?.setOnClickListener {
             viewModel.toggleBreathing()
         }
 
@@ -176,83 +337,44 @@ class MainActivity : AppCompatActivity() {
         viewModel.activePattern.observe(this) { pattern ->
             val position = breathingPatternAdapter.getPosition(pattern)
             if (position >= 0) {
-                binding.breathingContent.patternSpinnerView.setSelection(position)
+                getCurrentPatternSpinner()?.setSelection(position)
             }
         }
 
         // Update breath phase, animation, and instructions
         viewModel.breathPhase.observe(this) { phase ->
-            // Update UI based on phase
-            val instructionText = when (phase) {
-                BreathPhase.INHALE -> getString(R.string.inhale)
-                BreathPhase.HOLD1, BreathPhase.HOLD2 -> getString(R.string.hold)
-                BreathPhase.EXHALE -> getString(R.string.exhale)
-                BreathPhase.READY -> getString(R.string.ready)
-                BreathPhase.COMPLETE -> getString(R.string.complete)
-                null -> getString(R.string.ready) // Handle null case
+            updatePhaseUI(phase)
+
+            // Announce phase change for accessibility
+            phase?.let {
+                AccessibilityUtils.announceForAccessibility(
+                    this,
+                    getCurrentHALCircleView(),
+                    it,
+                    viewModel.counter.value ?: 0
+                )
             }
-
-            binding.breathingContent.halCircleView.instruction = instructionText
-
-            // Only show pulse animation during inhale and exhale phases
-            binding.breathingContent.halCircleView.showPulseEffect =
-                phase == BreathPhase.INHALE || phase == BreathPhase.EXHALE
-
-            // Update breath colors
-            binding.breathingContent.halCircleView.breathColor = viewModel.getBreathColor()
-            binding.breathingContent.halCircleView.innerColor = viewModel.getInnerColor()
-
-            // Update background gradient
-            updateBackgroundGradient()
         }
 
         // Update counter display
         viewModel.counter.observe(this) { count ->
-            binding.breathingContent.halCircleView.counter = count
+            getCurrentHALCircleView().counter = count
         }
 
         // Update circle expansion
         viewModel.circleExpansion.observe(this) { expansion ->
-            binding.breathingContent.halCircleView.expansion = expansion
+            getCurrentHALCircleView().expansion = expansion
         }
 
         // Update running state and control screen wakelock
         viewModel.isRunning.observe(this) { isRunning ->
-            val button = binding.breathingContent.actionButton
-            val spinner = binding.breathingContent.patternSpinnerView
-            val seekBar = binding.breathingContent.cyclesSeekBar
-
-            // Keep screen on during active breathing sessions
-            if (isRunning) {
-                window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
-                button.text = getString(R.string.stop)
-                button.backgroundTintList = ColorStateList.valueOf(
-                    resources.getColor(R.color.red_500, theme)
-                )
-                spinner.isEnabled = false
-                seekBar.isEnabled = false
-            } else {
-                // Allow screen to turn off when not in a session
-                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
-                if (viewModel.breathPhase.value == BreathPhase.COMPLETE) {
-                    button.text = getString(R.string.start_new_session)
-                } else {
-                    button.text = getString(R.string.start)
-                }
-                button.backgroundTintList = ColorStateList.valueOf(
-                    resources.getColor(R.color.cyan_gradient_start, theme)
-                )
-                spinner.isEnabled = true
-                seekBar.isEnabled = true
-            }
+            updateActionButtonState(isRunning)
         }
 
         // Update cycle counts
         viewModel.totalCycles.observe(this) { cycles ->
-            binding.breathingContent.cyclesSeekBar.progress = cycles - 1
-            binding.breathingContent.cyclesValue.text = cycles.toString()
+            getCurrentCyclesSeekBar()?.progress = cycles - 1
+            getCurrentCyclesTextView()?.text = cycles.toString()
             binding.progressRing.totalCycles = cycles
         }
 
@@ -267,6 +389,99 @@ class MainActivity : AppCompatActivity() {
                 // Optionally show the habit tracker
                 // showHabitTrackerFragment()
             }
+        }
+
+        // Observe power saving mode
+        viewModel.powerSavingMode.observe(this) { mode ->
+            // Apply animation quality settings
+            currentAnimationQuality = BatteryOptimizationUtils.getAnimationQuality(mode)
+            getCurrentHALCircleView().setAnimationQuality(currentAnimationQuality)
+        }
+    }
+
+    private fun updatePhaseUI(phase: BreathPhase?) {
+        // Update UI based on phase
+        val instructionText = when (phase) {
+            BreathPhase.INHALE -> getString(R.string.inhale)
+            BreathPhase.HOLD1, BreathPhase.HOLD2 -> getString(R.string.hold)
+            BreathPhase.EXHALE -> getString(R.string.exhale)
+            BreathPhase.READY -> getString(R.string.ready)
+            BreathPhase.COMPLETE -> getString(R.string.complete)
+            null -> getString(R.string.ready) // Handle null case
+        }
+
+        // Update the HAL circle view instruction
+        getCurrentHALCircleView().instruction = instructionText
+
+        // Update phase description text for landscape orientation
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            val descriptionRes = when (phase) {
+                BreathPhase.INHALE -> R.string.inhale_description
+                BreathPhase.HOLD1 -> R.string.hold_after_inhale_description
+                BreathPhase.EXHALE -> R.string.exhale_description
+                BreathPhase.HOLD2 -> R.string.hold_after_exhale_description
+                BreathPhase.READY -> R.string.ready_description
+                BreathPhase.COMPLETE -> R.string.complete_description
+                null -> R.string.ready_description
+            }
+            binding.breathingContentLand.phaseDescription.setText(descriptionRes)
+        }
+
+        // Only show pulse animation during inhale and exhale phases
+        getCurrentHALCircleView().showPulseEffect =
+            phase == BreathPhase.INHALE || phase == BreathPhase.EXHALE
+
+        // Update breath colors
+        getCurrentHALCircleView().breathColor = viewModel.getBreathColor()
+        getCurrentHALCircleView().innerColor = viewModel.getInnerColor()
+
+        // Update background gradient
+        updateBackgroundGradient()
+    }
+
+    private fun updateActionButtonState(isRunning: Boolean) {
+        val button = getCurrentActionButton() ?: return
+        val spinner = getCurrentPatternSpinner() ?: return
+        val seekBar = getCurrentCyclesSeekBar() ?: return
+
+        // Keep screen on during active breathing sessions
+        if (isRunning) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+            button.text = getString(R.string.stop)
+            button.backgroundTintList = ColorStateList.valueOf(
+                resources.getColor(R.color.red_500, theme)
+            )
+            spinner.isEnabled = false
+            seekBar.isEnabled = false
+
+            // Update accessibility
+            AccessibilityUtils.setupAccessibilityForButton(
+                button,
+                getString(R.string.stop),
+                getString(R.string.accessibility_stop_session)
+            )
+        } else {
+            // Allow screen to turn off when not in a session
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+            if (viewModel.breathPhase.value == BreathPhase.COMPLETE) {
+                button.text = getString(R.string.start_new_session)
+            } else {
+                button.text = getString(R.string.start)
+            }
+            button.backgroundTintList = ColorStateList.valueOf(
+                resources.getColor(R.color.cyan_gradient_start, theme)
+            )
+            spinner.isEnabled = true
+            seekBar.isEnabled = true
+
+            // Update accessibility
+            AccessibilityUtils.setupAccessibilityForButton(
+                button,
+                getString(R.string.start),
+                getString(R.string.accessibility_start_session)
+            )
         }
     }
 

@@ -4,6 +4,7 @@ import android.animation.ValueAnimator
 import android.graphics.Color
 import android.os.CountDownTimer
 import android.view.animation.LinearInterpolator
+import androidx.core.graphics.toColorInt
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,6 +14,7 @@ import com.example.breathwell.data.entity.BreathingSession
 import com.example.breathwell.data.repository.BreathingSessionRepository
 import com.example.breathwell.model.BreathPhase
 import com.example.breathwell.model.BreathingPattern
+import com.example.breathwell.utils.PowerSavingMode
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -46,6 +48,10 @@ class BreathingViewModel(
     private val _circleExpansion = MutableLiveData<Float>(50f)
     val circleExpansion: LiveData<Float> = _circleExpansion
 
+    // Power saving mode
+    private val _powerSavingMode = MutableLiveData<PowerSavingMode>(PowerSavingMode.NONE)
+    val powerSavingMode: LiveData<PowerSavingMode> = _powerSavingMode
+
     // New properties for habit tracking
     private val _sessionCompleted = MutableLiveData<Boolean>(false)
     val sessionCompleted: LiveData<Boolean> = _sessionCompleted
@@ -54,6 +60,16 @@ class BreathingViewModel(
 
     // Countdown timer
     private var timer: CountDownTimer? = null
+
+    // Circle animator
+    private var circleAnimator: ValueAnimator? = null
+
+    // Set power saving mode
+    fun setPowerSavingMode(mode: PowerSavingMode) {
+        if (_powerSavingMode.value != mode) {
+            _powerSavingMode.value = mode
+        }
+    }
 
     // Start/stop the breathing exercise
     fun toggleBreathing() {
@@ -74,6 +90,7 @@ class BreathingViewModel(
 
     private fun stopBreathing() {
         timer?.cancel()
+        circleAnimator?.cancel()
         _isRunning.value = false
         _breathPhase.value = BreathPhase.READY
         _currentCycle.value = 0
@@ -82,6 +99,7 @@ class BreathingViewModel(
 
     private fun completeSession() {
         timer?.cancel()
+        circleAnimator?.cancel()
         _isRunning.value = false
         _breathPhase.value = BreathPhase.COMPLETE
         _currentCycle.value = _totalCycles.value ?: 0
@@ -119,7 +137,7 @@ class BreathingViewModel(
         when (_breathPhase.value) {
             BreathPhase.READY -> startInhalePhase()
             BreathPhase.INHALE -> {
-                if (_activePattern.value?.hold1 ?: 0 > 0) {
+                if ((_activePattern.value?.hold1 ?: 0) > 0) {
                     startHold1Phase()
                 } else {
                     startExhalePhase()
@@ -127,7 +145,7 @@ class BreathingViewModel(
             }
             BreathPhase.HOLD1 -> startExhalePhase()
             BreathPhase.EXHALE -> {
-                if (_activePattern.value?.hold2 ?: 0 > 0) {
+                if ((_activePattern.value?.hold2 ?: 0) > 0) {
                     startHold2Phase()
                 } else {
                     advanceCycle()
@@ -177,9 +195,19 @@ class BreathingViewModel(
     }
 
     private fun animateCircle(from: Float, to: Float, duration: Long) {
+        // Cancel any running animation
+        circleAnimator?.cancel()
+
+        // Adjust animation duration based on power saving mode
+        val adjustedDuration = when (_powerSavingMode.value) {
+            PowerSavingMode.HIGH -> duration * 1.5
+            PowerSavingMode.MEDIUM -> duration * 1.2
+            else -> duration
+        }
+
         // Animation logic to update _circleExpansion
-        val animator = ValueAnimator.ofFloat(from, to).apply {
-            this.duration = duration
+        circleAnimator = ValueAnimator.ofFloat(from, to).apply {
+            this.duration = adjustedDuration.toLong()
             addUpdateListener { animation ->
                 _circleExpansion.value = animation.animatedValue as Float
             }
@@ -193,7 +221,14 @@ class BreathingViewModel(
 
         timer?.cancel()
 
-        timer = object : CountDownTimer(seconds * 1000L, 1000) {
+        // Adjust tick frequency based on power saving mode
+        val tickInterval = when (_powerSavingMode.value) {
+            PowerSavingMode.HIGH -> 1000L
+            PowerSavingMode.MEDIUM -> 500L
+            else -> 200L
+        }
+
+        timer = object : CountDownTimer(seconds * 1000L, tickInterval) {
             override fun onTick(millisUntilFinished: Long) {
                 _counter.value = (millisUntilFinished / 1000).toInt() + 1
             }
@@ -261,22 +296,22 @@ class BreathingViewModel(
     // Get HAL circle color based on current breath phase
     fun getBreathColor(): Int {
         return when (_breathPhase.value) {
-            BreathPhase.INHALE -> Color.parseColor("#00A6ED") // Bright blue for inhale
-            BreathPhase.HOLD1 -> Color.parseColor("#0080B3") // Deeper blue for hold after inhale
-            BreathPhase.EXHALE -> Color.parseColor("#00D084") // Bright green for exhale
-            BreathPhase.HOLD2 -> Color.parseColor("#00A66A") // Deeper green for hold after exhale
-            else -> Color.parseColor("#4682B4") // Default blue
+            BreathPhase.INHALE -> "#00A6ED".toColorInt() // Bright blue for inhale
+            BreathPhase.HOLD1 -> "#0080B3".toColorInt() // Deeper blue for hold after inhale
+            BreathPhase.EXHALE -> "#00D084".toColorInt() // Bright green for exhale
+            BreathPhase.HOLD2 -> "#00A66A".toColorInt() // Deeper green for hold after exhale
+            else -> "#4682B4".toColorInt() // Default blue
         }
     }
 
     // Get inner circle color (darker variation)
     fun getInnerColor(): Int {
         return when (_breathPhase.value) {
-            BreathPhase.INHALE -> Color.parseColor("#0076AD") // Darker blue
-            BreathPhase.HOLD1 -> Color.parseColor("#005580") // Even darker blue
-            BreathPhase.EXHALE -> Color.parseColor("#00A066") // Darker green
-            BreathPhase.HOLD2 -> Color.parseColor("#007A4D") // Even darker green
-            else -> Color.parseColor("#2C5984") // Default darker blue
+            BreathPhase.INHALE -> "#0076AD".toColorInt() // Darker blue
+            BreathPhase.HOLD1 -> "#005580".toColorInt() // Even darker blue
+            BreathPhase.EXHALE -> "#00A066".toColorInt() // Darker green
+            BreathPhase.HOLD2 -> "#007A4D".toColorInt() // Even darker green
+            else -> "#2C5984".toColorInt() // Default darker blue
         }
     }
 
@@ -285,20 +320,20 @@ class BreathingViewModel(
         return when (_breathPhase.value) {
             BreathPhase.INHALE, BreathPhase.HOLD1 -> {
                 Pair(
-                    Color.parseColor("#0A0A14"), // Very dark blue-black
-                    Color.parseColor("#0A1A30")  // Dark blue tint
+                    "#0A0A14".toColorInt(), // Very dark blue-black
+                    "#0A1A30".toColorInt()  // Dark blue tint
                 )
             }
             BreathPhase.EXHALE, BreathPhase.HOLD2 -> {
                 Pair(
-                    Color.parseColor("#0A0A14"), // Very dark blue-black
-                    Color.parseColor("#0A2414")  // Dark green tint
+                    "#0A0A14".toColorInt(), // Very dark blue-black
+                    "#0A2414".toColorInt()  // Dark green tint
                 )
             }
             else -> {
                 Pair(
-                    Color.parseColor("#0A0A14"), // Very dark blue-black
-                    Color.parseColor("#121218")  // Slightly lighter dark
+                    "#0A0A14".toColorInt(), // Very dark blue-black
+                    "#121218".toColorInt()  // Slightly lighter dark
                 )
             }
         }
@@ -307,5 +342,6 @@ class BreathingViewModel(
     override fun onCleared() {
         super.onCleared()
         timer?.cancel()
+        circleAnimator?.cancel()
     }
 }

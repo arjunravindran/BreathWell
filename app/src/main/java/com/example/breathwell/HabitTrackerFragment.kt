@@ -9,11 +9,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.breathwell.databinding.FragmentHabitTrackerBinding
 import com.example.breathwell.viewmodel.BreathingViewModel
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
-import java.time.temporal.TemporalAdjusters
 
 class HabitTrackerFragment : Fragment() {
 
@@ -38,7 +36,6 @@ class HabitTrackerFragment : Fragment() {
         viewModel = ViewModelProvider(requireActivity())[BreathingViewModel::class.java]
 
         setupCalendarNavigation()
-        setupStatistics()
         observeViewModel()
         renderCalendar(currentYearMonth)
     }
@@ -64,33 +61,6 @@ class HabitTrackerFragment : Fragment() {
         binding.monthTitle.text = currentYearMonth.format(formatter)
     }
 
-    private fun setupStatistics() {
-        val today = LocalDate.now()
-
-        // Calculate date ranges
-        val thisWeekStart = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
-        val thisWeekEnd = thisWeekStart.plusDays(6)
-
-        val thisMonthStart = today.withDayOfMonth(1)
-        val thisMonthEnd = today.withDayOfMonth(today.lengthOfMonth())
-
-        // Observe statistics
-        viewModel.getCompletionCountForRange(thisWeekStart, thisWeekEnd).observe(viewLifecycleOwner) { weekCount ->
-            binding.weeklyCompletionValue.text = "$weekCount/7"
-
-            val progress = (weekCount.toFloat() / 7f * 100).toInt()
-            binding.weeklyProgressBar.progress = progress
-        }
-
-        viewModel.getCompletionCountForRange(thisMonthStart, thisMonthEnd).observe(viewLifecycleOwner) { monthCount ->
-            val daysInMonth = thisMonthEnd.dayOfMonth
-            binding.monthlyCompletionValue.text = "$monthCount/$daysInMonth"
-
-            val progress = (monthCount.toFloat() / daysInMonth.toFloat() * 100).toInt()
-            binding.monthlyProgressBar.progress = progress
-        }
-    }
-
     private fun observeViewModel() {
         viewModel.completedDates.observe(viewLifecycleOwner) { dates ->
             // Update calendar with completed dates
@@ -108,6 +78,10 @@ class HabitTrackerFragment : Fragment() {
 
         val monthLength = yearMonth.lengthOfMonth()
         val firstDayOfMonth = yearMonth.atDay(1).dayOfWeek.value % 7 // 0 for Sunday
+
+        // Calculate the number of rows needed
+        val totalDays = firstDayOfMonth + monthLength
+        val rowsNeeded = (totalDays + 6) / 7 // Round up
 
         // Add empty spaces for days before the 1st of the month
         for (i in 0 until firstDayOfMonth) {
@@ -145,6 +119,14 @@ class HabitTrackerFragment : Fragment() {
             }
 
             binding.calendarGrid.addView(dayView)
+        }
+
+        // Add filler views for remaining cells in the grid to complete the matrix
+        val totalCells = rowsNeeded * 7
+        val fillerCellsNeeded = totalCells - (firstDayOfMonth + monthLength)
+        for (i in 0 until fillerCellsNeeded) {
+            val emptyView = layoutInflater.inflate(R.layout.item_calendar_empty, binding.calendarGrid, false)
+            binding.calendarGrid.addView(emptyView)
         }
     }
 

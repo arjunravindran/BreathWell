@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">BREATHWELL</string>
+    <string name="app_name">AeroPower</string>
     <string name="settings">Settings</string>
     <string name="breathing_technique">Technique</string>
     <string name="cycles">Cycles</string>
     <string name="start">START</string>
     <string name="stop">STOP</string>
     <string name="start_new_session">START NEW SESSION</string>
-    <string name="app_footer">BREATHWELL • MINDFUL BREATHING</string>
+    <string name="app_footer">AEROPOWER • MINDFUL BREATHING</string>
     <string name="inhale">INHALE</string>
     <string name="hold">HOLD</string>
     <string name="exhale">EXHALE</string>
@@ -27,11 +27,12 @@
     <string name="this_week">This Week</string>
     <string name="this_month">This Month</string>
     <string name="previous_month">Previous Month</string>
-    <string name="next_month">Next Month</string>
+    <string name="next_month">Next Moonth</string>
 
     <!-- Reminder Strings -->
     <string name="daily_reminders">Daily Reminders</string>
     <string name="enable_daily_reminders">Enable Daily Reminders</string>
     <string name="reminder_time">Reminder Time</string>
     <string name="save">SAVE</string>
+
 </resources>

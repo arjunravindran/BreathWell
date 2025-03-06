@@ -1,199 +1,321 @@
-<androidx.constraintlayout.widget.ConstraintLayout
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingStart="24dp"
-    android:paddingEnd="24dp"
-    android:paddingTop="8dp"
-    android:paddingBottom="0dp">
+    android:fillViewport="true">
 
-    <TextView
-        android:id="@+id/settingsTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/custom_breathing"
-        android:textColor="@color/white"
-        android:textSize="24sp"
-        android:fontFamily="sans-serif-light"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="32dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Inhale Duration -->
-    <TextView
-        android:id="@+id/inhaleLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/inhale_duration"
-        android:textColor="#B0FFFFFF"
-        android:textSize="12sp"
-        android:textAllCaps="true"
-        android:letterSpacing="0.05"
-        android:layout_marginTop="24dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settingsTitle" />
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/inhaleInputLayout"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:hint=""
-        app:boxBackgroundColor="#33000000"
-        app:boxCornerRadiusTopStart="16dp"
-        app:boxCornerRadiusTopEnd="16dp"
-        app:boxCornerRadiusBottomStart="16dp"
-        app:boxCornerRadiusBottomEnd="16dp"
-        app:boxStrokeWidth="0dp"
-        app:boxStrokeWidthFocused="0dp"
-        app:layout_constraintTop_toBottomOf="@id/inhaleLabel">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/inhaleInput"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:maxLength="2"
-            android:textColor="@color/white"
-            android:padding="16dp" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- Hold After Inhale -->
-    <TextView
-        android:id="@+id/hold1Label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/hold_after_inhale"
-        android:textColor="#B0FFFFFF"
-        android:textSize="12sp"
-        android:textAllCaps="true"
-        android:letterSpacing="0.05"
-        android:layout_marginTop="24dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/inhaleInputLayout" />
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/hold1InputLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:hint=""
-        app:boxBackgroundColor="#33000000"
-        app:boxCornerRadiusTopStart="16dp"
-        app:boxCornerRadiusTopEnd="16dp"
-        app:boxCornerRadiusBottomStart="16dp"
-        app:boxCornerRadiusBottomEnd="16dp"
-        app:boxStrokeWidth="0dp"
-        app:boxStrokeWidthFocused="0dp"
-        app:layout_constraintTop_toBottomOf="@id/hold1Label">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/hold1Input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:maxLength="2"
-            android:textColor="@color/white"
-            android:padding="16dp" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- Exhale Duration -->
-    <TextView
-        android:id="@+id/exhaleLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/exhale_duration"
-        android:textColor="#B0FFFFFF"
-        android:textSize="12sp"
-        android:textAllCaps="true"
-        android:letterSpacing="0.05"
-        android:layout_marginTop="24dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/hold1InputLayout" />
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/exhaleInputLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:hint=""
-        app:boxBackgroundColor="#33000000"
-        app:boxCornerRadiusTopStart="16dp"
-        app:boxCornerRadiusTopEnd="16dp"
-        app:boxCornerRadiusBottomStart="16dp"
-        app:boxCornerRadiusBottomEnd="16dp"
-        app:boxStrokeWidth="0dp"
-        app:boxStrokeWidthFocused="0dp"
-        app:layout_constraintTop_toBottomOf="@id/exhaleLabel">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/exhaleInput"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:maxLength="2"
-            android:textColor="@color/white"
-            android:padding="16dp" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- Hold After Exhale -->
-    <TextView
-        android:id="@+id/hold2Label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/hold_after_exhale"
-        android:textColor="#B0FFFFFF"
-        android:textSize="12sp"
-        android:textAllCaps="true"
-        android:letterSpacing="0.05"
-        android:layout_marginTop="24dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/exhaleInputLayout" />
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/hold2InputLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:hint=""
-        app:boxBackgroundColor="#33000000"
-        app:boxCornerRadiusTopStart="16dp"
-        app:boxCornerRadiusTopEnd="16dp"
-        app:boxCornerRadiusBottomStart="16dp"
-        app:boxCornerRadiusBottomEnd="16dp"
-        app:boxStrokeWidth="0dp"
-        app:boxStrokeWidthFocused="0dp"
-        app:layout_constraintTop_toBottomOf="@id/hold2Label">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/hold2Input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:maxLength="2"
-            android:textColor="@color/white"
-            android:padding="16dp" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- Apply Button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/applyButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/apply"
-        android:textColor="@color/white"
-        android:textSize="16sp"
-        android:letterSpacing="0.05"
-        android:textAllCaps="true"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
         android:paddingTop="16dp"
-        android:paddingBottom="16dp"
-        android:layout_marginTop="48dp"
-        app:cornerRadius="16dp"
-        app:backgroundTint="@color/cyan_gradient_start"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/hold2InputLayout" />
+        android:paddingBottom="24dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/settingsTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/custom_breathing"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:fontFamily="sans-serif-light"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Settings Form Container -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/formContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            app:layout_constraintTop_toBottomOf="@id/settingsTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <!-- Inhale Duration -->
+            <TextView
+                android:id="@+id/inhaleLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/inhale_duration"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:gravity="start|center_vertical"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_percent="0.6" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/inhaleInputLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint=""
+                app:boxBackgroundColor="#33000000"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp"
+                app:boxStrokeWidth="0dp"
+                app:boxStrokeWidthFocused="0dp"
+                app:layout_constraintTop_toTopOf="@id/inhaleLabel"
+                app:layout_constraintBottom_toBottomOf="@id/inhaleLabel"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintWidth_percent="0.25">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inhaleInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:padding="8dp"
+                    android:background="#33000000" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Hold After Inhale -->
+            <TextView
+                android:id="@+id/hold1Label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/hold_after_inhale"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:gravity="start|center_vertical"
+                android:layout_marginTop="24dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/inhaleInputLayout"
+                app:layout_constraintWidth_percent="0.6" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/hold1InputLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint=""
+                app:boxBackgroundColor="#33000000"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp"
+                app:boxStrokeWidth="0dp"
+                app:boxStrokeWidthFocused="0dp"
+                app:layout_constraintTop_toTopOf="@id/hold1Label"
+                app:layout_constraintBottom_toBottomOf="@id/hold1Label"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintWidth_percent="0.25">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/hold1Input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:padding="8dp"
+                    android:background="#33000000" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Exhale Duration -->
+            <TextView
+                android:id="@+id/exhaleLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/exhale_duration"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:gravity="start|center_vertical"
+                android:layout_marginTop="24dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/hold1InputLayout"
+                app:layout_constraintWidth_percent="0.6" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/exhaleInputLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint=""
+                app:boxBackgroundColor="#33000000"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp"
+                app:boxStrokeWidth="0dp"
+                app:boxStrokeWidthFocused="0dp"
+                app:layout_constraintTop_toTopOf="@id/exhaleLabel"
+                app:layout_constraintBottom_toBottomOf="@id/exhaleLabel"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintWidth_percent="0.25">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/exhaleInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:padding="8dp"
+                    android:background="#33000000" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Hold After Exhale -->
+            <TextView
+                android:id="@+id/hold2Label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/hold_after_exhale"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:gravity="start|center_vertical"
+                android:layout_marginTop="24dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/exhaleInputLayout"
+                app:layout_constraintWidth_percent="0.6" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/hold2InputLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint=""
+                app:boxBackgroundColor="#33000000"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp"
+                app:boxStrokeWidth="0dp"
+                app:boxStrokeWidthFocused="0dp"
+                app:layout_constraintTop_toTopOf="@id/hold2Label"
+                app:layout_constraintBottom_toBottomOf="@id/hold2Label"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintWidth_percent="0.25">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/hold2Input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:padding="8dp"
+                    android:background="#33000000" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Reminder Settings Section -->
+        <TextView
+            android:id="@+id/reminderTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/daily_reminders"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:fontFamily="sans-serif-light"
+            android:layout_marginTop="48dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/formContainer" />
+
+        <!-- Enable/Disable Switch -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/reminderSwitchLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toBottomOf="@id/reminderTitle">
+
+            <TextView
+                android:id="@+id/reminderLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/enable_daily_reminders"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintWidth_percent="0.7" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/reminderSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Time Picker Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/timePickerCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#33000000"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/reminderSwitchLayout">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/reminder_time"
+                    android:textColor="#B0FFFFFF"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="8dp" />
+
+                <TimePicker
+                    android:id="@+id/timePicker"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:timePickerMode="spinner"
+                    android:theme="@style/TimePickerTheme" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Apply Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/applyButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/apply"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:letterSpacing="0.05"
+            android:textAllCaps="true"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="16dp"
+            app:cornerRadius="16dp"
+            app:backgroundTint="@color/cyan_gradient_start"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/timePickerCard" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
