@@ -108,7 +108,7 @@
                     app:tint="@color/white" />
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Cycles Slider -->
+            <!-- Cycles Input -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/cyclesLayout"
                 android:layout_width="0dp"
@@ -130,31 +130,81 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:id="@+id/cyclesValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="5"
-                    android:textColor="#B0FFFFFF"
-                    android:textSize="12sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <SeekBar
-                    android:id="@+id/cyclesSeekBar"
+                <!-- Cycles input with plus/minus controls -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cyclesInputContainer"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:max="9"
-                    android:progress="4"
-                    android:progressTint="@color/cyan_400"
-                    android:thumbTint="@color/cyan_400"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp"
-                    android:contentDescription="@string/accessibility_cycles_slider"
-                    app:layout_constraintTop_toBottomOf="@id/cyclesLabel"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp"
+                    app:cardBackgroundColor="#33000000"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/cyclesLabel">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp">
+
+                        <!-- Decrease Button -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/decreaseCyclesButton"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            app:icon="@drawable/ic_remove"
+                            app:iconTint="@color/white"
+                            app:iconSize="18dp"
+                            android:insetLeft="0dp"
+                            android:insetTop="0dp"
+                            android:insetRight="0dp"
+                            android:insetBottom="0dp"
+                            app:cornerRadius="18dp"
+                            app:backgroundTint="#44FFFFFF"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:contentDescription="@string/decrease_cycles"/>
+
+                        <!-- Text Input -->
+                        <EditText
+                            android:id="@+id/cyclesInput"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:background="@null"
+                            android:inputType="number"
+                            android:maxLength="2"
+                            android:textColor="@color/white"
+                            android:textSize="18sp"
+                            android:textAlignment="center"
+                            android:imeOptions="actionDone"
+                            app:layout_constraintStart_toEndOf="@id/decreaseCyclesButton"
+                            app:layout_constraintEnd_toStartOf="@id/increaseCyclesButton"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent" />
+
+                        <!-- Increase Button -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/increaseCyclesButton"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            app:icon="@drawable/ic_add"
+                            app:iconTint="@color/white"
+                            app:iconSize="18dp"
+                            android:insetLeft="0dp"
+                            android:insetTop="0dp"
+                            android:insetRight="0dp"
+                            android:insetBottom="0dp"
+                            app:cornerRadius="18dp"
+                            app:backgroundTint="#44FFFFFF"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:contentDescription="@string/increase_cycles"/>
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </com.google.android.material.card.MaterialCardView>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <!-- Phase Description -->

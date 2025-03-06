@@ -35,4 +35,7 @@
     <string name="reminder_time">Reminder Time</string>
     <string name="save">SAVE</string>
 
+    <string name="decrease_cycles">Decrease cycles</string>
+    <string name="increase_cycles">Increase cycles</string>
+
 </resources>
