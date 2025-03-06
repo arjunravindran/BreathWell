@@ -508,7 +508,7 @@ class MainActivity : AppCompatActivity() {
         settingsFragment = SettingsFragment()
 
         supportFragmentManager.beginTransaction()
-            .replace(R.id.rootLayout, settingsFragment!!)
+            .replace(R.id.contentContainer, settingsFragment!!)
             .addToBackStack(null)
             .commit()
 
@@ -519,6 +519,12 @@ class MainActivity : AppCompatActivity() {
     private fun hideSettingsFragment() {
         supportFragmentManager.popBackStack()
         settingsFragment = null
+
+        // Show the main content again
+        binding.breathingContent.root.visibility = View.VISIBLE
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            binding.breathingContentLand.root.visibility = View.VISIBLE
+        }
 
         // Update settings icon
         binding.settingsIcon.setImageResource(R.drawable.ic_settings)
@@ -543,7 +549,7 @@ class MainActivity : AppCompatActivity() {
         habitTrackerFragment = HabitTrackerFragment()
 
         supportFragmentManager.beginTransaction()
-            .replace(R.id.rootLayout, habitTrackerFragment!!)
+            .replace(R.id.contentContainer, habitTrackerFragment!!)
             .addToBackStack(null)
             .commit()
 
@@ -554,6 +560,9 @@ class MainActivity : AppCompatActivity() {
     private fun hideHabitTrackerFragment() {
         supportFragmentManager.popBackStack()
         habitTrackerFragment = null
+
+        // Show the main content
+        binding.contentContainer.visibility = View.VISIBLE
 
         // Update icon
         binding.habitTrackerIcon.setImageResource(R.drawable.ic_calendar)
@@ -578,7 +587,7 @@ class MainActivity : AppCompatActivity() {
         reminderSettingsFragment = ReminderSettingsFragment()
 
         supportFragmentManager.beginTransaction()
-            .replace(R.id.rootLayout, reminderSettingsFragment!!)
+            .replace(R.id.contentContainer, reminderSettingsFragment!!)
             .addToBackStack(null)
             .commit()
     }
