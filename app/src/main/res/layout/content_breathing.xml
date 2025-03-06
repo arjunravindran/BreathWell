@@ -32,6 +32,14 @@
             android:layout_gravity="center"
             android:scaleX="0.9"
             android:scaleY="0.9" />
+
+        <!-- Circular Start/Stop Button - positioned in the center -->
+        <com.example.breathwell.ui.views.CircularStartStopButton
+            android:id="@+id/circularActionButton"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center"
+            android:contentDescription="@string/accessibility_start_session" />
     </FrameLayout>
 
     <!-- Pattern Selection -->
@@ -88,7 +96,7 @@
         android:layout_marginBottom="32dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/actionButton">
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <TextView
             android:id="@+id/cyclesLabel"
@@ -128,7 +136,7 @@
             app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Start/Stop Button -->
+    <!-- Keep the original action button but make it invisible -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/actionButton"
         android:layout_width="0dp"
@@ -140,6 +148,7 @@
         android:textAllCaps="true"
         android:paddingTop="16dp"
         android:paddingBottom="16dp"
+        android:visibility="gone"
         app:cornerRadius="16dp"
         app:backgroundTint="@color/cyan_gradient_start"
         app:layout_constraintStart_toStartOf="parent"

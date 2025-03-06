@@ -166,6 +166,11 @@ class MainActivity : AppCompatActivity() {
         else -> binding.breathingContentLand.actionButton
     }
 
+    private fun getCurrentCircularActionButton() = when {
+        binding.breathingContent.root.visibility == View.VISIBLE -> binding.breathingContent.circularActionButton
+        else -> binding.breathingContentLand.circularActionButton
+    }
+
     private fun getCurrentHALCircleView() = when {
         binding.breathingContent.root.visibility == View.VISIBLE -> binding.breathingContent.halCircleView
         else -> binding.breathingContentLand.halCircleView
@@ -213,8 +218,17 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.habit_tracker)
         )
 
-        // Setup accessibility for current action button
+        // Setup accessibility for action buttons
         getCurrentActionButton()?.let { button ->
+            AccessibilityUtils.setupAccessibilityForButton(
+                button,
+                getString(if (viewModel.isRunning.value == true) R.string.stop else R.string.start),
+                getString(if (viewModel.isRunning.value == true) R.string.accessibility_stop_session else R.string.accessibility_start_session)
+            )
+        }
+
+        // Also setup accessibility for circular action button
+        getCurrentCircularActionButton()?.let { button ->
             AccessibilityUtils.setupAccessibilityForButton(
                 button,
                 getString(if (viewModel.isRunning.value == true) R.string.stop else R.string.start),
@@ -297,8 +311,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupButtons() {
-        // Action button (Start/Stop)
+        // Original button (invisibly handling accessibility)
         getCurrentActionButton()?.setOnClickListener {
+            viewModel.toggleBreathing()
+        }
+
+        // Circular action button (Start/Stop)
+        getCurrentCircularActionButton()?.setOnButtonClickListener {
             viewModel.toggleBreathing()
         }
 
@@ -430,6 +449,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateActionButtonState(isRunning: Boolean) {
         val button = getCurrentActionButton() ?: return
+        val circularButton = getCurrentCircularActionButton() ?: return
         val spinner = getCurrentPatternSpinner() ?: return
         val seekBar = getCurrentCyclesSeekBar() ?: return
 
@@ -437,10 +457,15 @@ class MainActivity : AppCompatActivity() {
         if (isRunning) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
+            // Original button styling (still needed for accessibility)
             button.text = getString(R.string.stop)
             button.backgroundTintList = ColorStateList.valueOf(
                 resources.getColor(R.color.red_500, theme)
             )
+
+            // Set circular button state
+            circularButton.setPlaying(true)
+
             spinner.isEnabled = false
             seekBar.isEnabled = false
 
@@ -450,10 +475,17 @@ class MainActivity : AppCompatActivity() {
                 getString(R.string.stop),
                 getString(R.string.accessibility_stop_session)
             )
+
+            AccessibilityUtils.setupAccessibilityForButton(
+                circularButton,
+                getString(R.string.stop),
+                getString(R.string.accessibility_stop_session)
+            )
         } else {
             // Allow screen to turn off when not in a session
             window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
+            // Original button styling
             if (viewModel.breathPhase.value == BreathPhase.COMPLETE) {
                 button.text = getString(R.string.start_new_session)
             } else {
@@ -462,12 +494,22 @@ class MainActivity : AppCompatActivity() {
             button.backgroundTintList = ColorStateList.valueOf(
                 resources.getColor(R.color.cyan_gradient_start, theme)
             )
+
+            // Set circular button state
+            circularButton.setPlaying(false)
+
             spinner.isEnabled = true
             seekBar.isEnabled = true
 
             // Update accessibility
             AccessibilityUtils.setupAccessibilityForButton(
                 button,
+                getString(R.string.start),
+                getString(R.string.accessibility_start_session)
+            )
+
+            AccessibilityUtils.setupAccessibilityForButton(
+                circularButton,
                 getString(R.string.start),
                 getString(R.string.accessibility_start_session)
             )

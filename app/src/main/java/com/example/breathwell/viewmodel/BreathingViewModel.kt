@@ -3,6 +3,7 @@ package com.example.breathwell.viewmodel
 import android.animation.ValueAnimator
 import android.graphics.Color
 import android.os.CountDownTimer
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.LinearInterpolator
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.LiveData
@@ -17,6 +18,7 @@ import com.example.breathwell.model.BreathingPattern
 import com.example.breathwell.utils.PowerSavingMode
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import kotlin.math.pow
 
 class BreathingViewModel(
     private val repository: BreathingSessionRepository
@@ -198,6 +200,10 @@ class BreathingViewModel(
         // Cancel any running animation
         circleAnimator?.cancel()
 
+        // Make the range wider for more dramatic effect
+        val adjustedFrom = if (from < 50f) from * 0.8f else from  // Inhale starts from smaller size
+        val adjustedTo = if (to > 50f) to * 1.1f else to  // Exhale goes to larger size
+
         // Adjust animation duration based on power saving mode
         val adjustedDuration = when (_powerSavingMode.value) {
             PowerSavingMode.HIGH -> duration * 1.5
@@ -205,13 +211,15 @@ class BreathingViewModel(
             else -> duration
         }
 
-        // Animation logic to update _circleExpansion
-        circleAnimator = ValueAnimator.ofFloat(from, to).apply {
+        // Animation logic to update _circleExpansion with smoother easing
+        circleAnimator = ValueAnimator.ofFloat(adjustedFrom, adjustedTo).apply {
             this.duration = adjustedDuration.toLong()
             addUpdateListener { animation ->
                 _circleExpansion.value = animation.animatedValue as Float
             }
-            interpolator = LinearInterpolator()
+
+            // Use AccelerateDecelerateInterpolator for smoother start/stop
+            interpolator = AccelerateDecelerateInterpolator()
             start()
         }
     }
