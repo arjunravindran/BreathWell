@@ -41,10 +41,57 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginEnd="16dp"
-            app:layout_constraintEnd_toStartOf="@id/settingsButton"
+            app:layout_constraintEnd_toStartOf="@id/habitTrackerButton"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
 
+        <!-- Habit Tracker Button -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/habitTrackerButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="16dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#33000000"
+            app:layout_constraintEnd_toStartOf="@id/reminderButton"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <ImageView
+                android:id="@+id/habitTrackerIcon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_calendar"
+                android:contentDescription="@string/habit_tracker"
+                app:tint="@color/white" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Reminder Button -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/reminderButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="16dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#33000000"
+            app:layout_constraintEnd_toStartOf="@id/settingsButton"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <ImageView
+                android:id="@+id/reminderIcon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_notifications"
+                android:contentDescription="@string/daily_reminders"
+                app:tint="@color/white" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Settings Button -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/settingsButton"
             android:layout_width="48dp"

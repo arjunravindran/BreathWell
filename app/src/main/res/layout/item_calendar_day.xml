@@ -1,0 +1,41 @@
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_columnWeight="1"
+    android:layout_gravity="fill"
+    android:padding="4dp">
+
+    <View
+        android:id="@+id/dayBackground"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:layout_gravity="center"
+        android:background="@drawable/calendar_day_bg" />
+
+    <TextView
+        android:id="@+id/dayNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textColor="@color/white"
+        android:textSize="14sp" />
+
+    <View
+        android:id="@+id/completionIndicator"
+        android:layout_width="24dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginBottom="6dp"
+        android:background="@color/cyan_400"
+        android:visibility="invisible" />
+
+    <View
+        android:id="@+id/missedIndicator"
+        android:layout_width="24dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginBottom="6dp"
+        android:background="@color/red_500"
+        android:visibility="invisible" />
+</FrameLayout>

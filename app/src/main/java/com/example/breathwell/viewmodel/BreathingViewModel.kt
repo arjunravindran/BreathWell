@@ -7,10 +7,18 @@ import android.view.animation.LinearInterpolator
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.map
+import androidx.lifecycle.viewModelScope
+import com.example.breathwell.data.entity.BreathingSession
+import com.example.breathwell.data.repository.BreathingSessionRepository
 import com.example.breathwell.model.BreathPhase
 import com.example.breathwell.model.BreathingPattern
+import kotlinx.coroutines.launch
+import java.time.LocalDate
 
-class BreathingViewModel : ViewModel() {
+class BreathingViewModel(
+    private val repository: BreathingSessionRepository
+) : ViewModel() {
 
     // LiveData to observe in the UI
     private val _activePattern = MutableLiveData<BreathingPattern>(BreathingPattern.BOX_BREATHING)
@@ -38,6 +46,12 @@ class BreathingViewModel : ViewModel() {
     private val _circleExpansion = MutableLiveData<Float>(50f)
     val circleExpansion: LiveData<Float> = _circleExpansion
 
+    // New properties for habit tracking
+    private val _sessionCompleted = MutableLiveData<Boolean>(false)
+    val sessionCompleted: LiveData<Boolean> = _sessionCompleted
+
+    val completedDates: LiveData<List<LocalDate>> = repository.getAllCompletedDates()
+
     // Countdown timer
     private var timer: CountDownTimer? = null
 
@@ -54,6 +68,7 @@ class BreathingViewModel : ViewModel() {
         _isRunning.value = true
         _breathPhase.value = BreathPhase.READY
         _currentCycle.value = 0
+        _sessionCompleted.value = false
         advanceToNextPhase()
     }
 
@@ -69,8 +84,35 @@ class BreathingViewModel : ViewModel() {
         timer?.cancel()
         _isRunning.value = false
         _breathPhase.value = BreathPhase.COMPLETE
-        _currentCycle.value = 0
+        _currentCycle.value = _totalCycles.value ?: 0
         _circleExpansion.value = 50f
+
+        // Mark today's session as complete in the database
+        saveSessionToDatabase()
+
+        // Update session completed status
+        _sessionCompleted.value = true
+    }
+
+    private fun saveSessionToDatabase() {
+        val activePattern = _activePattern.value ?: BreathingPattern.BOX_BREATHING
+        val totalCycles = _totalCycles.value ?: 5
+
+        // Calculate total session duration in seconds
+        val cycleDuration = (activePattern.inhale + activePattern.hold1 +
+                activePattern.exhale + activePattern.hold2)
+        val totalDuration = cycleDuration * totalCycles
+
+        viewModelScope.launch {
+            val session = BreathingSession(
+                date = LocalDate.now(),
+                patternName = activePattern.name,
+                cycles = totalCycles,
+                durationSeconds = totalDuration,
+                completed = true
+            )
+            repository.insertSession(session)
+        }
     }
 
     private fun advanceToNextPhase() {
@@ -189,6 +231,31 @@ class BreathingViewModel : ViewModel() {
         if (_activePattern.value?.name == "Custom") {
             _activePattern.value = updated
         }
+    }
+
+    // Habit tracking methods
+    fun isDateCompleted(date: LocalDate): LiveData<Boolean> {
+        val sessions = repository.getSessionForDate(date)
+        return sessions.map { it.isNotEmpty() && it.any { session -> session.completed } }
+    }
+
+    fun getCurrentStreak(): LiveData<Int> {
+        // Calculate consecutive completed days up to today
+        return completedDates.map { dates ->
+            var streak = 0
+            var currentDate = LocalDate.now()
+
+            while (dates.contains(currentDate)) {
+                streak++
+                currentDate = currentDate.minusDays(1)
+            }
+
+            streak
+        }
+    }
+
+    fun getCompletionCountForRange(startDate: LocalDate, endDate: LocalDate): LiveData<Int> {
+        return repository.getCompletionCountForRange(startDate, endDate)
     }
 
     // Get HAL circle color based on current breath phase

@@ -20,9 +20,11 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.breathwell.databinding.ActivityMainBinding
 import com.example.breathwell.model.BreathPhase
 import com.example.breathwell.model.BreathingPattern
+import com.example.breathwell.notification.ReminderNotificationHelper
 import com.example.breathwell.ui.views.HALCircleView
 import com.example.breathwell.ui.views.ProgressRingView
 import com.example.breathwell.viewmodel.BreathingViewModel
+import com.example.breathwell.viewmodel.BreathingViewModelFactory
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,6 +32,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     private var settingsFragment: SettingsFragment? = null
+    private var habitTrackerFragment: HabitTrackerFragment? = null
+    private var reminderSettingsFragment: ReminderSettingsFragment? = null
+
     private val breathingPatternAdapter by lazy { BreathingPatternAdapter(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,8 +47,11 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Setup view model
-        viewModel = ViewModelProvider(this)[BreathingViewModel::class.java]
+        // Setup view model with factory
+        viewModel = ViewModelProvider(
+            this,
+            BreathingViewModelFactory(application)
+        )[BreathingViewModel::class.java]
 
         // Setup UI components
         setupPatternSpinner()
@@ -55,16 +63,42 @@ class MainActivity : AppCompatActivity() {
 
         // Setup back press handling with the new API
         setupBackPressHandling()
+
+        // Initialize daily reminders if enabled
+        initializeReminders()
+    }
+
+    private fun initializeReminders() {
+        val sharedPrefs = getSharedPreferences("breathwell_prefs", Context.MODE_PRIVATE)
+        val isEnabled = sharedPrefs.getBoolean("reminder_enabled", false)
+
+        if (isEnabled) {
+            val hour = sharedPrefs.getInt("reminder_hour", 20)
+            val minute = sharedPrefs.getInt("reminder_minute", 0)
+
+            val reminderHelper = ReminderNotificationHelper(this)
+            reminderHelper.scheduleDaily(hour, minute)
+        }
     }
 
     private fun setupBackPressHandling() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (settingsFragment != null && settingsFragment!!.isVisible) {
-                    hideSettingsFragment()
-                } else {
-                    isEnabled = false
-                    onBackPressedDispatcher.onBackPressed()
+                when {
+                    settingsFragment != null && settingsFragment!!.isVisible -> {
+                        hideSettingsFragment()
+                    }
+                    habitTrackerFragment != null && habitTrackerFragment!!.isVisible -> {
+                        hideHabitTrackerFragment()
+                    }
+                    reminderSettingsFragment != null && reminderSettingsFragment!!.isVisible -> {
+                        supportFragmentManager.popBackStack()
+                        reminderSettingsFragment = null
+                    }
+                    else -> {
+                        isEnabled = false
+                        onBackPressedDispatcher.onBackPressed()
+                    }
                 }
             }
         })
@@ -120,6 +154,20 @@ class MainActivity : AppCompatActivity() {
             } else {
                 hideSettingsFragment()
             }
+        }
+
+        // Habit Tracker button
+        binding.habitTrackerButton.setOnClickListener {
+            if (habitTrackerFragment == null || !habitTrackerFragment!!.isVisible) {
+                showHabitTrackerFragment()
+            } else {
+                hideHabitTrackerFragment()
+            }
+        }
+
+        // Reminder settings button
+        binding.reminderButton.setOnClickListener {
+            showReminderSettingsFragment()
         }
     }
 
@@ -211,6 +259,15 @@ class MainActivity : AppCompatActivity() {
         viewModel.currentCycle.observe(this) { cycle ->
             binding.progressRing.currentCycle = cycle
         }
+
+        // Observe session completion for habit tracking
+        viewModel.sessionCompleted.observe(this) { completed ->
+            if (completed) {
+                // Could show a completion message or animation
+                // Optionally show the habit tracker
+                // showHabitTrackerFragment()
+            }
+        }
     }
 
     private fun updateBackgroundGradient() {
@@ -233,6 +290,16 @@ class MainActivity : AppCompatActivity() {
             viewModel.toggleBreathing() // Stop the session first
         }
 
+        // Hide other fragments if visible
+        if (habitTrackerFragment != null && habitTrackerFragment!!.isVisible) {
+            hideHabitTrackerFragment()
+        }
+
+        if (reminderSettingsFragment != null && reminderSettingsFragment!!.isVisible) {
+            supportFragmentManager.popBackStack()
+            reminderSettingsFragment = null
+        }
+
         // Create and show the settings fragment
         settingsFragment = SettingsFragment()
 
@@ -251,6 +318,64 @@ class MainActivity : AppCompatActivity() {
 
         // Update settings icon
         binding.settingsIcon.setImageResource(R.drawable.ic_settings)
+    }
+
+    private fun showHabitTrackerFragment() {
+        if (viewModel.isRunning.value == true) {
+            viewModel.toggleBreathing() // Stop the session first
+        }
+
+        // Hide settings if visible
+        if (settingsFragment != null && settingsFragment!!.isVisible) {
+            hideSettingsFragment()
+        }
+
+        if (reminderSettingsFragment != null && reminderSettingsFragment!!.isVisible) {
+            supportFragmentManager.popBackStack()
+            reminderSettingsFragment = null
+        }
+
+        // Create and show the habit tracker fragment
+        habitTrackerFragment = HabitTrackerFragment()
+
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.contentContainer, habitTrackerFragment!!)
+            .addToBackStack(null)
+            .commit()
+
+        // Update header icon
+        binding.habitTrackerIcon.setImageResource(R.drawable.ic_close)
+    }
+
+    private fun hideHabitTrackerFragment() {
+        supportFragmentManager.popBackStack()
+        habitTrackerFragment = null
+
+        // Update icon
+        binding.habitTrackerIcon.setImageResource(R.drawable.ic_calendar)
+    }
+
+    private fun showReminderSettingsFragment() {
+        if (viewModel.isRunning.value == true) {
+            viewModel.toggleBreathing() // Stop the session first
+        }
+
+        // Hide other fragments if visible
+        if (settingsFragment != null && settingsFragment!!.isVisible) {
+            hideSettingsFragment()
+        }
+
+        if (habitTrackerFragment != null && habitTrackerFragment!!.isVisible) {
+            hideHabitTrackerFragment()
+        }
+
+        // Create and show the reminder settings fragment
+        reminderSettingsFragment = ReminderSettingsFragment()
+
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.contentContainer, reminderSettingsFragment!!)
+            .addToBackStack(null)
+            .commit()
     }
 
     /**

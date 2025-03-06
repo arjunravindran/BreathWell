@@ -19,4 +19,19 @@
     <string name="exhale_duration">Exhale Duration (sec)</string>
     <string name="hold_after_exhale">Hold After Exhale (sec)</string>
     <string name="apply">APPLY</string>
+
+    <!-- Habit Tracker Strings -->
+    <string name="habit_tracker">Habit Tracker</string>
+    <string name="current_streak">Current Streak</string>
+    <string name="days">days</string>
+    <string name="this_week">This Week</string>
+    <string name="this_month">This Month</string>
+    <string name="previous_month">Previous Month</string>
+    <string name="next_month">Next Month</string>
+
+    <!-- Reminder Strings -->
+    <string name="daily_reminders">Daily Reminders</string>
+    <string name="enable_daily_reminders">Enable Daily Reminders</string>
+    <string name="reminder_time">Reminder Time</string>
+    <string name="save">SAVE</string>
 </resources>
