@@ -17,13 +17,12 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/patternLabel">
 
-        <!-- Cycle Progress Ring - 20% smaller through scaling -->
+        <!-- Cycle Progress Ring - concentric with HAL Circle -->
         <com.example.breathwell.ui.views.ProgressRingView
-            android:id="@+id/cycleProgressRing"
+            android:id="@+id/progressRing"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
-             />
+            android:layout_gravity="center" />
 
         <!-- HAL Circle View - 20% bigger through scaling -->
         <com.example.breathwell.ui.views.HALCircleView
@@ -31,8 +30,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:scaleX="1.2"
-            android:scaleY="1.2" />
+            android:scaleX="0.9"
+            android:scaleY="0.9" />
     </FrameLayout>
 
     <!-- Pattern Selection -->

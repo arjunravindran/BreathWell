@@ -171,6 +171,11 @@ class MainActivity : AppCompatActivity() {
         else -> binding.breathingContentLand.halCircleView
     }
 
+    private fun getCurrentProgressRing() = when {
+        binding.breathingContent.root.visibility == View.VISIBLE -> binding.breathingContent.progressRing
+        else -> binding.breathingContentLand.progressRing
+    }
+
     private fun setupPowerSavingMode() {
         // Determine current power saving mode
         currentPowerSavingMode = BatteryOptimizationUtils.adaptToPowerSaving(this)
@@ -197,12 +202,6 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.accessibility_open_habit_tracker)
         )
 
-        AccessibilityUtils.setupAccessibilityForButton(
-            binding.reminderButton,
-            getString(R.string.daily_reminders),
-            getString(R.string.accessibility_open_reminders)
-        )
-
         // Set content descriptions for icons
         AccessibilityUtils.setContentDescription(
             binding.settingsIcon,
@@ -212,11 +211,6 @@ class MainActivity : AppCompatActivity() {
         AccessibilityUtils.setContentDescription(
             binding.habitTrackerIcon,
             getString(R.string.habit_tracker)
-        )
-
-        AccessibilityUtils.setContentDescription(
-            binding.reminderIcon,
-            getString(R.string.daily_reminders)
         )
 
         // Setup accessibility for current action button
@@ -325,11 +319,6 @@ class MainActivity : AppCompatActivity() {
                 hideHabitTrackerFragment()
             }
         }
-
-        // Reminder settings button
-        binding.reminderButton.setOnClickListener {
-            showReminderSettingsFragment()
-        }
     }
 
     private fun observeViewModelState() {
@@ -375,11 +364,11 @@ class MainActivity : AppCompatActivity() {
         viewModel.totalCycles.observe(this) { cycles ->
             getCurrentCyclesSeekBar()?.progress = cycles - 1
             getCurrentCyclesTextView()?.text = cycles.toString()
-            binding.progressRing.totalCycles = cycles
+            getCurrentProgressRing()?.totalCycles = cycles
         }
 
         viewModel.currentCycle.observe(this) { cycle ->
-            binding.progressRing.currentCycle = cycle
+            getCurrentProgressRing()?.currentCycle = cycle
         }
 
         // Observe session completion for habit tracking
@@ -519,7 +508,7 @@ class MainActivity : AppCompatActivity() {
         settingsFragment = SettingsFragment()
 
         supportFragmentManager.beginTransaction()
-            .replace(R.id.contentContainer, settingsFragment!!)
+            .replace(R.id.rootLayout, settingsFragment!!)
             .addToBackStack(null)
             .commit()
 
@@ -554,7 +543,7 @@ class MainActivity : AppCompatActivity() {
         habitTrackerFragment = HabitTrackerFragment()
 
         supportFragmentManager.beginTransaction()
-            .replace(R.id.contentContainer, habitTrackerFragment!!)
+            .replace(R.id.rootLayout, habitTrackerFragment!!)
             .addToBackStack(null)
             .commit()
 
@@ -570,6 +559,7 @@ class MainActivity : AppCompatActivity() {
         binding.habitTrackerIcon.setImageResource(R.drawable.ic_calendar)
     }
 
+    // Keep for ReminderSettingsFragment functionality in settings
     private fun showReminderSettingsFragment() {
         if (viewModel.isRunning.value == true) {
             viewModel.toggleBreathing() // Stop the session first
@@ -588,7 +578,7 @@ class MainActivity : AppCompatActivity() {
         reminderSettingsFragment = ReminderSettingsFragment()
 
         supportFragmentManager.beginTransaction()
-            .replace(R.id.contentContainer, reminderSettingsFragment!!)
+            .replace(R.id.rootLayout, reminderSettingsFragment!!)
             .addToBackStack(null)
             .commit()
     }

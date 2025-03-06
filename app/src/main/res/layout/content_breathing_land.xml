@@ -13,16 +13,31 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.5" />
 
-    <!-- Left side: HAL Circle View -->
-    <com.example.breathwell.ui.views.HALCircleView
-        android:id="@+id/halCircleView"
+    <!-- Left side: HAL Circle View with Progress Ring -->
+    <FrameLayout
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/guideline"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- Cycle Progress Ring - concentric with HAL Circle -->
+        <com.example.breathwell.ui.views.ProgressRingView
+            android:id="@+id/progressRing"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center" />
+
+        <com.example.breathwell.ui.views.HALCircleView
+            android:id="@+id/halCircleView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:scaleX="0.9"
+            android:scaleY="0.9" />
+    </FrameLayout>
 
     <!-- Right side: Controls -->
     <ScrollView

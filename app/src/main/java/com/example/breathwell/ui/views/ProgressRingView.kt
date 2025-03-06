@@ -21,15 +21,15 @@ class ProgressRingView @JvmOverloads constructor(
     private val backgroundPaint = Paint().apply {
         color = "#333333".toColorInt() // Dark gray
         style = Paint.Style.STROKE
-        strokeWidth = dpToPx(5f) // Thicker stroke
+        strokeWidth = dpToPx(8f) // Thicker stroke
         isAntiAlias = true
-        alpha = 80 // 30% opacity
+        alpha = 60 // Lower opacity for background
     }
 
     private val progressPaint = Paint().apply {
         color = "#38E1FF".toColorInt() // Cyan
         style = Paint.Style.STROKE
-        strokeWidth = dpToPx(5f) // Thicker stroke
+        strokeWidth = dpToPx(8f) // Thicker stroke
         strokeCap = Paint.Cap.ROUND
         isAntiAlias = true
     }
@@ -68,7 +68,7 @@ class ProgressRingView @JvmOverloads constructor(
         // Calculate angle for progress arc
         val progressAngle = 360f * (currentCycle.toFloat() / totalCycles.toFloat().coerceAtLeast(1f))
 
-        // Draw background circle
+        // Draw background circle - slightly larger than HAL Circle
         rect.set(
             centerX - radius,
             centerY - radius,
@@ -81,12 +81,10 @@ class ProgressRingView @JvmOverloads constructor(
         canvas.withRotation(-90f, centerX, centerY) {
             drawArc(rect, 0f, progressAngle, false, progressPaint)
         }
-
-        // No text is drawn anymore
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val desiredSize = dpToPx(48f).toInt()
+        val desiredSize = dpToPx(300f).toInt() // Larger default size
 
         val widthMode = MeasureSpec.getMode(widthMeasureSpec)
         val widthSize = MeasureSpec.getSize(widthMeasureSpec)
