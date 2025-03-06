@@ -1,7 +1,0 @@
-<resources>
-    <!-- Battery optimization strings -->
-    <string name="battery_optimization_title">Battery Optimization</string>
-    <string name="battery_optimization_message">For reliable reminders, please disable battery optimization</string>
-    <string name="battery_optimization_button">Disable Optimization</string>
-    <string name="cancel">Cancel</string>
-</resources>

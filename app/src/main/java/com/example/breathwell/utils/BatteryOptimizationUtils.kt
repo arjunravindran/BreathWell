@@ -4,11 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.appcompat.app.AlertDialog
-import com.example.breathwell.R
 
 // Enums defined at top of file
 enum class PowerSavingMode {
@@ -46,16 +44,16 @@ object BatteryOptimizationUtils {
         if (isIgnoringBatteryOptimizations(activity)) return
 
         AlertDialog.Builder(activity)
-            .setTitle(R.string.battery_optimization_title)
-            .setMessage(R.string.battery_optimization_message)
-            .setPositiveButton(R.string.battery_optimization_button) { _, _ ->
+            .setTitle("Battery Optimization")
+            .setMessage("For reliable reminders, please disable battery optimization")
+            .setPositiveButton("Disable Optimization") { _, _ ->
                 val intent = Intent().apply {
                     action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
                     data = Uri.parse("package:${activity.packageName}")
                 }
                 activity.startActivity(intent)
             }
-            .setNegativeButton(R.string.cancel, null)
+            .setNegativeButton("Cancel", null)
             .show()
     }
 
