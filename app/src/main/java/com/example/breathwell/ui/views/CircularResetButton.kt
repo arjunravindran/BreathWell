@@ -73,9 +73,9 @@ class CircularResetButton @JvmOverloads constructor(
         // Draw shadow with slight offset
         canvas.drawCircle(centerX + 2f, centerY + 2f, radius, shadowPaint)
 
-        // Draw button background - use red color instead of cyan for reset button
+        // Draw button background - use cyan color for reset button
         buttonPaint.color = if (isButtonEnabled) {
-            ContextCompat.getColor(context, R.color.red_500)
+            ContextCompat.getColor(context, R.color.cyan_400)
         } else {
             // Use a muted color when disabled
             ContextCompat.getColor(context, R.color.gray_600)

@@ -148,6 +148,29 @@ class BreathingViewModel(
         _sessionCompleted.value = false
     }
 
+    /**
+     * Reset the entire breathing session to its initial state
+     */
+    fun resetBreathing() {
+        // Cancel ongoing countdowns and animations
+        countdownController.cancelCountdown()
+        circleAnimator?.cancel()
+        circleAnimator = null
+
+        // Reset state
+        _isRunning.value = false
+        savedStateHandle.set(KEY_IS_RUNNING, false)
+        resetBreathingPhase()
+        resetCurrentCycle()
+        _circleExpansion.value = 50f
+        savedStateHandle.set(KEY_EXPANSION, 50f)
+        _counter.value = 0
+
+        // Trigger event for reset feedback
+        phaseTransitionEvent.value = BreathPhase.READY
+        phaseTransitionEvent.value = null
+    }
+
     // Set power saving mode
     fun setPowerSavingMode(mode: PowerSavingMode) {
         if (_powerSavingMode.value != mode) {

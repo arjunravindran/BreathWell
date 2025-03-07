@@ -58,6 +58,5 @@
     <string name="accessibility_start_new_session">Start new breathing session</string>
     <string name="accessibility_expand_dropdown">Expand dropdown</string>
     <string name="accessibility_cycles_slider">Adjust number of cycles</string>
-    <string name="accessibility_reset">Reset application to initial state</string>
 
 </resources>

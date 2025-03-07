@@ -26,7 +26,7 @@ class HALCircleView @JvmOverloads constructor(
     // Paint objects for various components
     private val circlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
-        color = "#00A6ED".toColorInt() // Default blue
+        color = "#38E1FF".toColorInt() // Cyan color
     }
 
     private val outerRingPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -38,7 +38,7 @@ class HALCircleView @JvmOverloads constructor(
 
     private val innerCirclePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
-        color = "#0076AD".toColorInt() // Darker blue
+        color = "#00D4FF".toColorInt() // Darker cyan
     }
 
     private val glowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -74,14 +74,14 @@ class HALCircleView @JvmOverloads constructor(
             invalidate()
         }
 
-    var breathColor: Int = "#00A6ED".toColorInt()
+    var breathColor: Int = "#38E1FF".toColorInt() // Cyan
         set(value) {
             field = value
             circlePaint.color = value
             invalidate()
         }
 
-    var innerColor: Int = "#0076AD".toColorInt()
+    var innerColor: Int = "#00D4FF".toColorInt() // Darker cyan
         set(value) {
             field = value
             innerCirclePaint.color = value
@@ -267,8 +267,8 @@ class HALCircleView @JvmOverloads constructor(
 
     private class SavedState : BaseSavedState {
         var expansion: Float = 50f
-        var breathColor: Int = "#00A6ED".toColorInt()
-        var innerColor: Int = "#0076AD".toColorInt()
+        var breathColor: Int = "#38E1FF".toColorInt() // Cyan
+        var innerColor: Int = "#00D4FF".toColorInt() // Darker cyan
         var counter: Int = 0
         var instruction: String = "READY"
         var showPulseEffect: Boolean = false

@@ -34,6 +34,17 @@
             android:scaleY="0.9" />
     </FrameLayout>
 
+    <!-- Reset Button - Added to left edge -->
+    <com.example.breathwell.ui.views.CircularResetButton
+        android:id="@+id/resetButton"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="0dp"
+        android:layout_marginBottom="-20dp"
+        android:contentDescription="@string/accessibility_reset_session"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/circleContainer" />
+
     <!-- Start/Stop Button - Moved to right edge -->
     <com.example.breathwell.ui.views.CircularStartStopButton
         android:id="@+id/circularActionButton"
@@ -45,7 +56,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="@id/circleContainer" />
 
-    <!-- Pattern selection -->
+    <!-- Rest of layout remains unchanged -->
     <TextView
         android:id="@+id/patternLabel"
         android:layout_width="wrap_content"

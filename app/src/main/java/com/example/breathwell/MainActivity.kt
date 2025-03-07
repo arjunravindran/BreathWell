@@ -74,9 +74,9 @@ class MainActivity : AppCompatActivity() {
         initializeReminders()
 
         // Check battery optimization
-        lifecycleScope.launch {
-            BatteryOptimizationUtils.requestDisableBatteryOptimization(this@MainActivity)
-        }
+        //lifecycleScope.launch {
+        //    BatteryOptimizationUtils.requestDisableBatteryOptimization(this@MainActivity)
+        //}
     }
 
     private fun requestPermissions() {

@@ -82,6 +82,11 @@ class BreathingUIController(
         getCurrentCircularActionButton().setOnButtonClickListener {
             viewModel.toggleBreathing()
         }
+
+        // Reset button
+        getCurrentResetButton().setOnButtonClickListener {
+            viewModel.resetBreathing()
+        }
     }
 
     /**
@@ -127,6 +132,15 @@ class BreathingUIController(
                 button,
                 activity.getString(if (viewModel.isRunning.value == true) R.string.stop else R.string.start),
                 activity.getString(if (viewModel.isRunning.value == true) R.string.accessibility_stop_session else R.string.accessibility_start_session)
+            )
+        }
+
+        // Setup accessibility for reset button
+        getCurrentResetButton().let { button ->
+            AccessibilityUtils.setupAccessibilityForButton(
+                button,
+                activity.getString(R.string.reset),
+                activity.getString(R.string.accessibility_reset_session)
             )
         }
 
@@ -242,6 +256,7 @@ class BreathingUIController(
     private fun updateActionButtonState(isRunning: Boolean) {
         val button = getCurrentActionButton()
         val circularButton = getCurrentCircularActionButton()
+        val resetButton = getCurrentResetButton()
         val spinner = getCurrentPatternSpinner()
         val cyclesSlider = getCurrentCyclesSlider()
 
@@ -254,6 +269,9 @@ class BreathingUIController(
 
             // Set circular button state
             circularButton.setPlaying(true)
+
+            // Enable reset button during session
+            resetButton.isEnabled = true
 
             // Disable controls during session
             spinner.isEnabled = false
@@ -284,6 +302,9 @@ class BreathingUIController(
 
             // Set circular button state
             circularButton.setPlaying(false)
+
+            // Disable reset button when not in session (except after completion)
+            resetButton.isEnabled = viewModel.breathPhase.value == BreathPhase.COMPLETE
 
             // Enable controls when not in session
             spinner.isEnabled = true
@@ -354,6 +375,11 @@ class BreathingUIController(
     private fun getCurrentCircularActionButton() = when {
         binding.breathingContent.root.isVisible -> binding.breathingContent.circularActionButton
         else -> binding.breathingContentLand.circularActionButton
+    }
+
+    private fun getCurrentResetButton() = when {
+        binding.breathingContent.root.isVisible -> binding.breathingContent.resetButton
+        else -> binding.breathingContentLand.resetButton
     }
 
     private fun getCurrentProgressRing() = when {
