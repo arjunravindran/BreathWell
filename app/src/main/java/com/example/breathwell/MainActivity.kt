@@ -7,7 +7,6 @@ import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageView
 import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
@@ -17,7 +16,6 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.breathwell.databinding.ActivityMainBinding
-import com.example.breathwell.model.BreathingPattern
 import com.example.breathwell.notification.ReminderNotificationHelper
 import com.example.breathwell.ui.BreathingUIController
 import com.example.breathwell.utils.AccessibilityUtils
@@ -149,7 +147,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Setup power saving mode
-        viewModel.setPowerSavingMode(BatteryOptimizationUtils.adaptToPowerSaving(this))
+        //viewModel.setPowerSavingMode(BatteryOptimizationUtils.adaptToPowerSaving(this))
 
         // Setup navigation buttons
         setupNavigationButtons()
@@ -164,7 +162,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
         binding.habitTrackerButton.setOnClickListener {
             if (activeFragment == HABIT_TRACKER_FRAGMENT) {
                 hideHabitTrackerFragment()
@@ -172,65 +169,6 @@ class MainActivity : AppCompatActivity() {
                 showHabitTrackerFragment()
             }
         }
-
-        // Check if reset button exists in the layout before setting it up
-        val resetButton = binding.root.findViewById<View>(R.id.resetButton)
-        if (resetButton != null) {
-            resetButton.setOnClickListener {
-                resetApplication()
-            }
-
-            AccessibilityUtils.setupAccessibilityForButton(
-                resetButton,
-                getString(R.string.reset),
-                getString(R.string.accessibility_reset)
-            )
-
-            val resetIcon = binding.root.findViewById<ImageView>(R.id.resetIcon)
-            if (resetIcon != null) {
-                AccessibilityUtils.setContentDescription(
-                    resetIcon,
-                    getString(R.string.reset)
-                )
-            }
-        }
-    }
-
-    /**
-     * Resets the application to its initial state
-     * This should be called when the reset button is clicked
-     */
-    private fun resetApplication() {
-        // Stop any ongoing session
-        if (viewModel.isRunning.value == true) {
-            viewModel.toggleBreathing()
-        }
-
-        // Reset breathing phase to READY
-        viewModel.resetBreathingPhase()
-
-        // Reset to default breathing pattern
-        viewModel.setActivePattern(BreathingPattern.BOX_BREATHING)
-
-        // Reset cycles to default value
-        viewModel.setTotalCycles(5)
-
-        // Reset current cycle count
-        viewModel.resetCurrentCycle()
-
-        // Ensure we're showing the main breathing content
-        if (activeFragment != NO_FRAGMENT) {
-            supportFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
-            activeFragment = NO_FRAGMENT
-            showBreathingContent()
-
-            // Reset navigation buttons
-            binding.settingsIcon.setImageResource(R.drawable.ic_settings)
-            binding.habitTrackerIcon.setImageResource(R.drawable.ic_calendar)
-        }
-
-        // Reset UI state
-        breathingUIController.refreshUIState()
     }
 
     private fun setupBackPressHandling() {

@@ -37,29 +37,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
 
-        <!-- Add this to activity_main.xml inside the headerLayout, between appTitle and habitTrackerButton -->
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/resetButton"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginEnd="16dp"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="0dp"
-            app:cardBackgroundColor="#33000000"
-            app:layout_constraintEnd_toStartOf="@id/habitTrackerButton"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
-
-            <ImageView
-                android:id="@+id/resetIcon"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_refresh"
-                android:contentDescription="@string/reset"
-                app:tint="@color/white" />
-        </com.google.android.material.card.MaterialCardView>
+        <!-- Reset button removed -->
 
         <!-- Habit Tracker Button -->
         <com.google.android.material.card.MaterialCardView
@@ -131,7 +109,5 @@
             android:visibility="gone" />
 
     </FrameLayout>
-
-    <!-- Footer text removed -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

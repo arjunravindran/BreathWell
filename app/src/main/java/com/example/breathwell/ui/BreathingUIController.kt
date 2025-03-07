@@ -249,7 +249,7 @@ class BreathingUIController(
             // Original button styling (still needed for accessibility)
             button.text = activity.getString(R.string.stop)
             button.backgroundTintList = ColorStateList.valueOf(
-                activity.resources.getColor(R.color.red_500, activity.theme)
+                activity.resources.getColor(R.color.cyan_400, activity.theme)
             )
 
             // Set circular button state

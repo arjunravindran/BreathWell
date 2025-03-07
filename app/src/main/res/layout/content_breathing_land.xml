@@ -41,20 +41,7 @@
             android:scaleY="0.9" />
     </FrameLayout>
 
-    <!-- Reset Button - Now visible at all times -->
-    <com.example.breathwell.ui.views.CircularResetButton
-        android:id="@+id/resetButton"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_marginStart="24dp"
-        android:contentDescription="@string/accessibility_reset_session"
-        android:visibility="visible"
-        app:layout_constraintStart_toStartOf="@id/circleContainer"
-        app:layout_constraintBottom_toBottomOf="@id/circleContainer"
-        app:layout_constraintTop_toTopOf="@id/circleContainer"
-        app:layout_constraintVertical_bias="0.85" />
-
-    <!-- Start/Stop Button - Positioned on right side -->
+    <!-- Start/Stop Button - Moved to right edge -->
     <com.example.breathwell.ui.views.CircularStartStopButton
         android:id="@+id/circularActionButton"
         android:layout_width="80dp"
