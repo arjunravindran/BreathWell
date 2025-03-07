@@ -129,6 +129,25 @@ class BreathingViewModel(
         savedStateHandle.set(KEY_SOUND_ENABLED, _soundEnabled.value)
     }
 
+    /**
+     * Reset breathing phase to READY state
+     */
+    fun resetBreathingPhase() {
+        _breathPhase.value = BreathPhase.READY
+        savedStateHandle.set(KEY_PHASE, BreathPhase.READY)
+        _circleExpansion.value = 50f  // Reset circle to neutral position
+        savedStateHandle.set(KEY_EXPANSION, 50f)
+    }
+
+    /**
+     * Reset current cycle count to zero
+     */
+    fun resetCurrentCycle() {
+        _currentCycle.value = 0
+        savedStateHandle.set(KEY_CURRENT_CYCLE, 0)
+        _sessionCompleted.value = false
+    }
+
     // Set power saving mode
     fun setPowerSavingMode(mode: PowerSavingMode) {
         if (_powerSavingMode.value != mode) {
