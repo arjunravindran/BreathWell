@@ -24,6 +24,14 @@
             android:layout_height="match_parent"
             android:layout_gravity="center" />
 
+        <!-- Put the button next to appear behind the HAL circle -->
+        <com.example.breathwell.ui.views.CircularStartStopButton
+            android:id="@+id/circularActionButton"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center"
+            android:contentDescription="@string/accessibility_start_session" />
+
         <!-- HAL Circle View - 20% bigger through scaling -->
         <com.example.breathwell.ui.views.HALCircleView
             android:id="@+id/halCircleView"
@@ -32,17 +40,9 @@
             android:layout_gravity="center"
             android:scaleX="0.9"
             android:scaleY="0.9" />
-
-        <!-- Circular Start/Stop Button - positioned in the center -->
-        <com.example.breathwell.ui.views.CircularStartStopButton
-            android:id="@+id/circularActionButton"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_gravity="center"
-            android:contentDescription="@string/accessibility_start_session" />
     </FrameLayout>
 
-    <!-- Pattern Selection - now positioned higher -->
+    <!-- Rest of the layout remains unchanged -->
     <TextView
         android:id="@+id/patternLabel"
         android:layout_width="wrap_content"

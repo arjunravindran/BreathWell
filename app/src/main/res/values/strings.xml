@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">AeroPower</string>
     <string name="settings">Settings</string>
@@ -35,7 +34,11 @@
     <string name="reminder_time">Reminder Time</string>
     <string name="save">SAVE</string>
 
-    <string name="decrease_cycles">Decrease cycles</string>
-    <string name="increase_cycles">Increase cycles</string>
+    <!-- Feedback Settings -->
+    <string name="feedback_settings">Feedback Settings</string>
+    <string name="enable_sound_effects">Enable Sound Effects</string>
+    <string name="enable_vibration">Enable Vibration</string>
+    <string name="sound_settings">Sound Settings</string>
+    <string name="vibration_settings">Vibration Settings</string>
 
 </resources>

@@ -217,6 +217,77 @@
             </com.google.android.material.textfield.TextInputLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <!-- Feedback Settings Section -->
+        <TextView
+            android:id="@+id/feedbackTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/feedback_settings"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:fontFamily="sans-serif-light"
+            android:layout_marginTop="48dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/formContainer" />
+
+        <!-- Sound Settings -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/soundSettingsLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toBottomOf="@id/feedbackTitle">
+
+            <TextView
+                android:id="@+id/soundLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/enable_sound_effects"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintWidth_percent="0.7" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/soundSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Vibration Settings -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/vibrationSettingsLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/soundSettingsLayout">
+
+            <TextView
+                android:id="@+id/vibrationLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/enable_vibration"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintWidth_percent="0.7" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/vibrationSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
         <!-- Reminder Settings Section -->
         <TextView
             android:id="@+id/reminderTitle"
@@ -228,7 +299,7 @@
             android:fontFamily="sans-serif-light"
             android:layout_marginTop="48dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/formContainer" />
+            app:layout_constraintTop_toBottomOf="@id/vibrationSettingsLayout" />
 
         <!-- Enable/Disable Switch -->
         <androidx.constraintlayout.widget.ConstraintLayout

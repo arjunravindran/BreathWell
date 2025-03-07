@@ -163,6 +163,12 @@ class BreathingUIController(
             if (position >= 0) {
                 getCurrentPatternSpinner()?.setSelection(position)
             }
+        viewModel.isRunning.observe(activity) { isRunning ->
+            // Only show timer when a session is running
+            getCurrentHALCircleView().showTimer = isRunning
+
+            // Rest of your existing isRunning observer code...
+        }
         }
 
         // Update breath phase, animation, and instructions

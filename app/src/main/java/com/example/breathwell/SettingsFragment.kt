@@ -35,6 +35,7 @@ class SettingsFragment : Fragment() {
         reminderHelper = ReminderNotificationHelper(requireContext())
 
         setupBreathingSettings()
+        setupFeedbackSettings()
         setupReminderSettings()
         setupApplyButton()
     }
@@ -46,6 +47,34 @@ class SettingsFragment : Fragment() {
         binding.hold1Input.setText(customPattern.hold1.toString())
         binding.exhaleInput.setText(customPattern.exhale.toString())
         binding.hold2Input.setText(customPattern.hold2.toString())
+    }
+
+    private fun setupFeedbackSettings() {
+        // Set initial switch states from ViewModel
+        binding.soundSwitch.isChecked = viewModel.soundEnabled.value ?: true
+        binding.vibrationSwitch.isChecked = viewModel.vibrationEnabled.value ?: true
+
+        // Setup switch change listeners
+        binding.soundSwitch.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.toggleSound()
+        }
+
+        binding.vibrationSwitch.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.toggleVibration()
+        }
+
+        // Observe changes from ViewModel to keep UI in sync
+        viewModel.soundEnabled.observe(viewLifecycleOwner) { enabled ->
+            if (binding.soundSwitch.isChecked != enabled) {
+                binding.soundSwitch.isChecked = enabled
+            }
+        }
+
+        viewModel.vibrationEnabled.observe(viewLifecycleOwner) { enabled ->
+            if (binding.vibrationSwitch.isChecked != enabled) {
+                binding.vibrationSwitch.isChecked = enabled
+            }
+        }
     }
 
     private fun setupReminderSettings() {

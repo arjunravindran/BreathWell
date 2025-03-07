@@ -1,10 +1,7 @@
 package com.example.breathwell.viewmodel
 
 import android.animation.ValueAnimator
-import android.graphics.Color
-import android.os.CountDownTimer
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.view.animation.LinearInterpolator
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -16,15 +13,15 @@ import com.example.breathwell.data.entity.BreathingSession
 import com.example.breathwell.data.repository.BreathingSessionRepository
 import com.example.breathwell.model.BreathPhase
 import com.example.breathwell.model.BreathingPattern
+import com.example.breathwell.utils.CountdownController
 import com.example.breathwell.utils.PowerSavingMode
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import kotlin.math.pow
 
 class BreathingViewModel(
     private val repository: BreathingSessionRepository,
     private val savedStateHandle: SavedStateHandle = SavedStateHandle()
-) : ViewModel() {
+) : ViewModel(), CountdownController.CountdownListener {
 
     // Keys for saved state
     private companion object {
@@ -34,6 +31,8 @@ class BreathingViewModel(
         const val KEY_CURRENT_CYCLE = "current_cycle"
         const val KEY_IS_RUNNING = "is_running"
         const val KEY_PHASE = "breath_phase"
+        const val KEY_VIBRATION_ENABLED = "vibration_enabled"
+        const val KEY_SOUND_ENABLED = "sound_enabled"
     }
 
     // LiveData to observe in the UI
@@ -74,6 +73,21 @@ class BreathingViewModel(
     private val _powerSavingMode = MutableLiveData<PowerSavingMode>(PowerSavingMode.NONE)
     val powerSavingMode: LiveData<PowerSavingMode> = _powerSavingMode
 
+    // Haptic feedback settings
+    private val _vibrationEnabled = MutableLiveData<Boolean>(
+        savedStateHandle.get(KEY_VIBRATION_ENABLED) ?: true
+    )
+    val vibrationEnabled: LiveData<Boolean> = _vibrationEnabled
+
+    // Sound feedback settings
+    private val _soundEnabled = MutableLiveData<Boolean>(
+        savedStateHandle.get(KEY_SOUND_ENABLED) ?: true
+    )
+    val soundEnabled: LiveData<Boolean> = _soundEnabled
+
+    // Phase transition event - used to notify for sound/vibration
+    val phaseTransitionEvent = MutableLiveData<BreathPhase?>()
+
     // Animation state properties for restoration
     private var wasAnimatingBeforeStop = false
     private var lastAnimationTimestamp = 0L
@@ -84,11 +98,30 @@ class BreathingViewModel(
 
     val completedDates: LiveData<List<LocalDate>> = repository.getAllCompletedDates()
 
-    // Countdown timer
-    private var timer: CountDownTimer? = null
+    // Countdown controller
+    private val countdownController = CountdownController()
 
     // Circle animator
     private var circleAnimator: ValueAnimator? = null
+
+    init {
+        // Setup countdown controller
+        countdownController.setListener(this)
+    }
+
+    /**
+     * Callback when countdown ticks
+     */
+    override fun onTick(secondsRemaining: Int) {
+        _counter.value = secondsRemaining
+    }
+
+    /**
+     * Callback when countdown phase completes
+     */
+    override fun onPhaseComplete() {
+        advanceToNextPhase()
+    }
 
     /**
      * Save animation state for restoration after config changes
@@ -100,6 +133,8 @@ class BreathingViewModel(
         savedStateHandle.set(KEY_CURRENT_CYCLE, _currentCycle.value)
         savedStateHandle.set(KEY_IS_RUNNING, _isRunning.value)
         savedStateHandle.set(KEY_PHASE, _breathPhase.value)
+        savedStateHandle.set(KEY_VIBRATION_ENABLED, _vibrationEnabled.value)
+        savedStateHandle.set(KEY_SOUND_ENABLED, _soundEnabled.value)
     }
 
     /**
@@ -111,6 +146,7 @@ class BreathingViewModel(
     fun setPowerSavingMode(mode: PowerSavingMode) {
         if (_powerSavingMode.value != mode) {
             _powerSavingMode.value = mode
+            countdownController.setPowerSavingMode(mode)
         }
     }
 
@@ -121,6 +157,18 @@ class BreathingViewModel(
         } else {
             startBreathing()
         }
+    }
+
+    // Toggle vibration feedback
+    fun toggleVibration() {
+        _vibrationEnabled.value = _vibrationEnabled.value != true
+        savedStateHandle.set(KEY_VIBRATION_ENABLED, _vibrationEnabled.value)
+    }
+
+    // Toggle sound feedback
+    fun toggleSound() {
+        _soundEnabled.value = _soundEnabled.value != true
+        savedStateHandle.set(KEY_SOUND_ENABLED, _soundEnabled.value)
     }
 
     private fun startBreathing() {
@@ -140,9 +188,8 @@ class BreathingViewModel(
     }
 
     private fun stopBreathing() {
-        wasAnimatingBeforeStop = timer != null || circleAnimator != null
-        timer?.cancel()
-        timer = null
+        wasAnimatingBeforeStop = countdownController != null || circleAnimator != null
+        countdownController.cancelCountdown()
         circleAnimator?.cancel()
         circleAnimator = null
 
@@ -158,8 +205,7 @@ class BreathingViewModel(
     }
 
     private fun completeSession() {
-        timer?.cancel()
-        timer = null
+        countdownController.cancelCountdown()
         circleAnimator?.cancel()
         circleAnimator = null
         _isRunning.value = false
@@ -170,6 +216,10 @@ class BreathingViewModel(
         savedStateHandle.set(KEY_CURRENT_CYCLE, _currentCycle.value)
         _circleExpansion.value = 50f
         savedStateHandle.set(KEY_EXPANSION, 50f)
+
+        // Trigger phase transition event for completion sound/vibration
+        phaseTransitionEvent.value = BreathPhase.COMPLETE
+        phaseTransitionEvent.value = null
 
         // Mark today's session as complete in the database
         saveSessionToDatabase()
@@ -200,25 +250,53 @@ class BreathingViewModel(
     }
 
     private fun advanceToNextPhase() {
-        when (_breathPhase.value) {
-            BreathPhase.READY -> startInhalePhase()
+        val nextPhase = when (_breathPhase.value) {
+            BreathPhase.READY -> {
+                startInhalePhase()
+                BreathPhase.INHALE
+            }
             BreathPhase.INHALE -> {
                 if ((_activePattern.value?.hold1 ?: 0) > 0) {
                     startHold1Phase()
+                    BreathPhase.HOLD1
                 } else {
                     startExhalePhase()
+                    BreathPhase.EXHALE
                 }
             }
-            BreathPhase.HOLD1 -> startExhalePhase()
+            BreathPhase.HOLD1 -> {
+                startExhalePhase()
+                BreathPhase.EXHALE
+            }
             BreathPhase.EXHALE -> {
                 if ((_activePattern.value?.hold2 ?: 0) > 0) {
                     startHold2Phase()
+                    BreathPhase.HOLD2
                 } else {
                     advanceCycle()
+                    if (_currentCycle.value == _totalCycles.value) {
+                        BreathPhase.COMPLETE
+                    } else {
+                        BreathPhase.INHALE
+                    }
                 }
             }
-            BreathPhase.HOLD2 -> advanceCycle()
-            else -> {}  // No action for COMPLETE
+            BreathPhase.HOLD2 -> {
+                advanceCycle()
+                if (_currentCycle.value == _totalCycles.value) {
+                    BreathPhase.COMPLETE
+                } else {
+                    BreathPhase.INHALE
+                }
+            }
+            else -> null  // No action for COMPLETE
+        }
+
+        // Trigger phase transition event for sound/vibration
+        nextPhase?.let {
+            phaseTransitionEvent.value = it
+            // Reset after event is consumed
+            phaseTransitionEvent.value = null
         }
     }
 
@@ -238,14 +316,16 @@ class BreathingViewModel(
     private fun startInhalePhase() {
         _breathPhase.value = BreathPhase.INHALE
         savedStateHandle.set(KEY_PHASE, BreathPhase.INHALE)
-        startCountdown(_activePattern.value?.inhale ?: 4)
+        val inhaleDuration = _activePattern.value?.inhale ?: 4
+        countdownController.startCountdown(inhaleDuration)
         animateCircle(30f, 95f, _activePattern.value?.inhale?.times(1000L) ?: 4000L)
     }
 
     private fun startHold1Phase() {
         _breathPhase.value = BreathPhase.HOLD1
         savedStateHandle.set(KEY_PHASE, BreathPhase.HOLD1)
-        startCountdown(_activePattern.value?.hold1 ?: 0)
+        val holdDuration = _activePattern.value?.hold1 ?: 0
+        countdownController.startCountdown(holdDuration)
         // Keep expanded at 95%
         _circleExpansion.value = 95f
         savedStateHandle.set(KEY_EXPANSION, 95f)
@@ -254,14 +334,16 @@ class BreathingViewModel(
     private fun startExhalePhase() {
         _breathPhase.value = BreathPhase.EXHALE
         savedStateHandle.set(KEY_PHASE, BreathPhase.EXHALE)
-        startCountdown(_activePattern.value?.exhale ?: 4)
+        val exhaleDuration = _activePattern.value?.exhale ?: 4
+        countdownController.startCountdown(exhaleDuration)
         animateCircle(95f, 30f, _activePattern.value?.exhale?.times(1000L) ?: 4000L)
     }
 
     private fun startHold2Phase() {
         _breathPhase.value = BreathPhase.HOLD2
         savedStateHandle.set(KEY_PHASE, BreathPhase.HOLD2)
-        startCountdown(_activePattern.value?.hold2 ?: 0)
+        val hold2Duration = _activePattern.value?.hold2 ?: 0
+        countdownController.startCountdown(hold2Duration)
         // Keep contracted at 30%
         _circleExpansion.value = 30f
         savedStateHandle.set(KEY_EXPANSION, 30f)
@@ -295,30 +377,6 @@ class BreathingViewModel(
             interpolator = AccelerateDecelerateInterpolator()
             start()
         }
-    }
-
-    private fun startCountdown(seconds: Int) {
-        _counter.value = seconds
-
-        timer?.cancel()
-        timer = null
-
-        // Adjust tick frequency based on power saving mode
-        val tickInterval = when (_powerSavingMode.value) {
-            PowerSavingMode.HIGH -> 1000L
-            PowerSavingMode.MEDIUM -> 500L
-            else -> 200L
-        }
-
-        timer = object : CountDownTimer(seconds * 1000L, tickInterval) {
-            override fun onTick(millisUntilFinished: Long) {
-                _counter.value = (millisUntilFinished / 1000).toInt() + 1
-            }
-
-            override fun onFinish() {
-                advanceToNextPhase()
-            }
-        }.start()
     }
 
     // Settings methods
@@ -423,8 +481,7 @@ class BreathingViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        timer?.cancel()
-        timer = null
+        countdownController.cleanup()
         circleAnimator?.cancel()
         circleAnimator = null
     }

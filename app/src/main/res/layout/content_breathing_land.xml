@@ -38,12 +38,13 @@
             android:scaleX="0.9"
             android:scaleY="0.9" />
 
-        <!-- Add the circular button here too -->
+        <!-- Move button to the bottom area -->
         <com.example.breathwell.ui.views.CircularStartStopButton
             android:id="@+id/circularActionButton"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:layout_gravity="center"
+            android:layout_gravity="center|bottom"
+            android:layout_marginBottom="40dp"
             android:contentDescription="@string/accessibility_start_session" />
     </FrameLayout>
 

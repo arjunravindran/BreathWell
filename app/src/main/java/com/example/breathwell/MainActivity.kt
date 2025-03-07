@@ -1,11 +1,16 @@
 package com.example.breathwell
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -17,6 +22,8 @@ import com.example.breathwell.managers.PowerSavingManager
 import com.example.breathwell.notification.ReminderNotificationHelper
 import com.example.breathwell.ui.BreathingUIController
 import com.example.breathwell.utils.BatteryOptimizationUtils
+import com.example.breathwell.utils.SoundEffectHelper
+import com.example.breathwell.utils.VibrationHelper
 import com.example.breathwell.viewmodel.BreathingViewModel
 import com.example.breathwell.viewmodel.BreathingViewModelFactory
 import kotlinx.coroutines.launch
@@ -32,8 +39,16 @@ class MainActivity : AppCompatActivity() {
     private lateinit var powerSavingManager: PowerSavingManager
     private lateinit var animationManager: AnimationManager
 
+    // Feedback helpers
+    private lateinit var soundEffectHelper: SoundEffectHelper
+    private lateinit var vibrationHelper: VibrationHelper
+
     // UI Controllers
     private lateinit var breathingUIController: BreathingUIController
+
+    companion object {
+        private const val PERMISSION_REQUEST_CODE = 1001
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +63,9 @@ class MainActivity : AppCompatActivity() {
         // Setup ViewModel
         setupViewModel()
 
+        // Request permissions needed for the app
+        requestPermissions()
+
         // Initialize managers
         initializeManagers()
 
@@ -57,11 +75,36 @@ class MainActivity : AppCompatActivity() {
         // Setup back press handling
         setupBackPressHandling()
 
-        // Check battery optimization
-        //checkBatteryOptimization()
-
         // Initialize reminders if enabled
         initializeReminders()
+    }
+
+    private fun requestPermissions() {
+        // For vibration
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.VIBRATE
+            ) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.VIBRATE),
+                PERMISSION_REQUEST_CODE
+            )
+        }
+
+        // For Android 13+ we need to request notification permissions
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    PERMISSION_REQUEST_CODE
+                )
+            }
+        }
     }
 
     private fun setupViewModel() {
@@ -78,11 +121,33 @@ class MainActivity : AppCompatActivity() {
         powerSavingManager = PowerSavingManager(this, viewModel)
         animationManager = AnimationManager(binding, viewModel)
 
+        // Initialize feedback helpers
+        soundEffectHelper = SoundEffectHelper(this)
+        vibrationHelper = VibrationHelper(this)
+
         // Add animation manager as lifecycle observer for proper state handling
         lifecycle.addObserver(animationManager)
 
         // Set up power saving mode adaptations
         powerSavingManager.setupPowerSavingMode()
+
+        // Set up phase transition observer for feedback
+        viewModel.phaseTransitionEvent.observe(this) { phase ->
+            phase?.let {
+                // Provide haptic and sound feedback at each phase transition
+                vibrationHelper.vibrateForPhase(it)
+                soundEffectHelper.playPhaseTransitionSound(it)
+            }
+        }
+
+        // Observe feedback settings
+        viewModel.vibrationEnabled.observe(this) { enabled ->
+            vibrationHelper.setVibrationEnabled(enabled)
+        }
+
+        viewModel.soundEnabled.observe(this) { enabled ->
+            soundEffectHelper.setSoundEnabled(enabled)
+        }
     }
 
     private fun setupUIControllers() {
@@ -131,6 +196,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            // Reinitialize helpers after permission results
+            if (::vibrationHelper.isInitialized && ::soundEffectHelper.isInitialized) {
+                // Nothing to do - the helpers will check permissions internally
+            }
+        }
+    }
+
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         orientationManager.handleConfigurationChange(newConfig)
@@ -156,6 +236,11 @@ class MainActivity : AppCompatActivity() {
 
         if (::powerSavingManager.isInitialized) {
             powerSavingManager.cleanup()
+        }
+
+        // Clean up sound resources
+        if (::soundEffectHelper.isInitialized) {
+            soundEffectHelper.release()
         }
     }
 

@@ -53,9 +53,9 @@ class HALCircleView @JvmOverloads constructor(
         isAntiAlias = true
         color = Color.WHITE
         textAlign = Paint.Align.CENTER
-        textSize = spToPx(48f)
+        textSize = spToPx(64f) // Larger text size for better visibility
         typeface = Typeface.DEFAULT_BOLD
-        alpha = 230 // 90% opacity
+        alpha = 255 // Full opacity for clear visibility
     }
 
     private val instructionPaint = Paint().apply {
@@ -121,7 +121,16 @@ class HALCircleView @JvmOverloads constructor(
             }
         }
 
-    // Set animation quality based on power saving mode
+    // Flag to control if timer is visible (only during active sessions)
+    var showTimer: Boolean = false
+        set(value) {
+            field = value
+            invalidate()
+        }
+
+    /**
+     * Set animation quality based on power saving mode
+     */
     fun setAnimationQuality(quality: AnimationQuality) {
         if (animationQuality == quality) return
 
@@ -132,17 +141,17 @@ class HALCircleView @JvmOverloads constructor(
             AnimationQuality.FULL -> {
                 animationDuration = 1500L
                 instructionPaint.alpha = 230
-                timerPaint.alpha = 230
+                timerPaint.alpha = 255
             }
             AnimationQuality.REDUCED -> {
                 animationDuration = 2000L
                 instructionPaint.alpha = 220
-                timerPaint.alpha = 220
+                timerPaint.alpha = 240
             }
             AnimationQuality.MINIMAL -> {
                 animationDuration = 2500L
                 instructionPaint.alpha = 210
-                timerPaint.alpha = 210
+                timerPaint.alpha = 230
             }
         }
 
@@ -256,8 +265,14 @@ class HALCircleView @JvmOverloads constructor(
         // Draw inner circle (HAL's "eye")
         canvas.drawCircle(centerX, centerY, innerRadius, innerCirclePaint)
 
-        // Draw counter text
-        if (counter > 0) {
+        // Draw counter text only if showTimer is true and counter > 0
+        if (showTimer && counter > 0) {
+            // Draw shadow behind text for better contrast
+            val shadowPaint = Paint(timerPaint)
+            shadowPaint.setShadowLayer(15f, 0f, 0f, Color.BLACK)
+            canvas.drawText(counter.toString(), centerX, centerY + timerPaint.textSize / 3, shadowPaint)
+
+            // Draw the actual counter text
             canvas.drawText(counter.toString(), centerX, centerY + timerPaint.textSize / 3, timerPaint)
         }
 
@@ -281,6 +296,7 @@ class HALCircleView @JvmOverloads constructor(
         savedState.instruction = instruction
         savedState.showPulseEffect = showPulseEffect
         savedState.pulseScale = pulseScale
+        savedState.showTimer = showTimer
         return savedState
     }
 
@@ -294,6 +310,7 @@ class HALCircleView @JvmOverloads constructor(
                 counter = state.counter
                 instruction = state.instruction
                 pulseScale = state.pulseScale
+                showTimer = state.showTimer
                 // Don't immediately start animation, will be handled by showPulseEffect setter
                 this.showPulseEffect = state.showPulseEffect
             }
@@ -309,6 +326,7 @@ class HALCircleView @JvmOverloads constructor(
         var instruction: String = "READY"
         var showPulseEffect: Boolean = false
         var pulseScale: Float = 1.0f
+        var showTimer: Boolean = false
 
         constructor(superState: Parcelable?) : super(superState)
 
@@ -320,6 +338,7 @@ class HALCircleView @JvmOverloads constructor(
             instruction = parcel.readString() ?: "READY"
             showPulseEffect = parcel.readInt() == 1
             pulseScale = parcel.readFloat()
+            showTimer = parcel.readInt() == 1
         }
 
         override fun writeToParcel(out: Parcel, flags: Int) {
@@ -331,6 +350,7 @@ class HALCircleView @JvmOverloads constructor(
             out.writeString(instruction)
             out.writeInt(if (showPulseEffect) 1 else 0)
             out.writeFloat(pulseScale)
+            out.writeInt(if (showTimer) 1 else 0)
         }
 
         companion object {
