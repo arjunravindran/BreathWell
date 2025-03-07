@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
@@ -15,10 +16,6 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.breathwell.databinding.ActivityMainBinding
-import com.example.breathwell.managers.AnimationManager
-import com.example.breathwell.managers.FragmentManager
-import com.example.breathwell.managers.OrientationManager
-import com.example.breathwell.managers.PowerSavingManager
 import com.example.breathwell.notification.ReminderNotificationHelper
 import com.example.breathwell.ui.BreathingUIController
 import com.example.breathwell.utils.BatteryOptimizationUtils
@@ -32,23 +29,20 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var viewModel: BreathingViewModel
     private lateinit var binding: ActivityMainBinding
-
-    // Managers
-    private lateinit var orientationManager: OrientationManager
-    private lateinit var fragmentManager: FragmentManager
-    private lateinit var powerSavingManager: PowerSavingManager
-    private lateinit var animationManager: AnimationManager
-
-    // Feedback helpers
+    private lateinit var breathingUIController: BreathingUIController
     private lateinit var soundEffectHelper: SoundEffectHelper
     private lateinit var vibrationHelper: VibrationHelper
 
-    // UI Controllers
-    private lateinit var breathingUIController: BreathingUIController
-
     companion object {
         private const val PERMISSION_REQUEST_CODE = 1001
+        const val NO_FRAGMENT = 0
+        const val SETTINGS_FRAGMENT = 1
+        const val HABIT_TRACKER_FRAGMENT = 2
+        const val REMINDER_SETTINGS_FRAGMENT = 3
     }
+
+    // Track current active fragment
+    private var activeFragment = NO_FRAGMENT
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,31 +54,37 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Setup ViewModel
-        setupViewModel()
+        // Initialize ViewModel
+        viewModel = ViewModelProvider(
+            this,
+            BreathingViewModelFactory(application)
+        )[BreathingViewModel::class.java]
 
-        // Request permissions needed for the app
+        // Request needed permissions
         requestPermissions()
 
-        // Initialize managers
-        initializeManagers()
-
-        // Setup UI controllers
-        setupUIControllers()
+        // Initialize components
+        initializeComponents()
 
         // Setup back press handling
         setupBackPressHandling()
 
         // Initialize reminders if enabled
         initializeReminders()
+
+        // Check battery optimization
+        lifecycleScope.launch {
+            BatteryOptimizationUtils.requestDisableBatteryOptimization(this@MainActivity)
+        }
     }
 
     private fun requestPermissions() {
-        // For vibration
+        // Check for vibration permission
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.VIBRATE
-            ) != PackageManager.PERMISSION_GRANTED) {
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.VIBRATE),
@@ -92,12 +92,13 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        // For Android 13+ we need to request notification permissions
+        // For Android 13+ request notification permissions
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
                     this,
                     Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED) {
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
                 ActivityCompat.requestPermissions(
                     this,
                     arrayOf(Manifest.permission.POST_NOTIFICATIONS),
@@ -107,38 +108,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupViewModel() {
-        viewModel = ViewModelProvider(
-            this,
-            BreathingViewModelFactory(application)
-        )[BreathingViewModel::class.java]
-    }
-
-    private fun initializeManagers() {
-        // Create and initialize all managers
-        orientationManager = OrientationManager(this, binding, viewModel)
-        fragmentManager = FragmentManager(this, binding, viewModel)
-        powerSavingManager = PowerSavingManager(this, viewModel)
-        animationManager = AnimationManager(binding, viewModel)
-
+    private fun initializeComponents() {
         // Initialize feedback helpers
         soundEffectHelper = SoundEffectHelper()
         vibrationHelper = VibrationHelper(this)
 
-        // Add animation manager as lifecycle observer for proper state handling
-        lifecycle.addObserver(animationManager)
+        // Create UI controller
+        breathingUIController = BreathingUIController(this, binding, viewModel)
 
-        // Set up power saving mode adaptations
-        powerSavingManager.setupPowerSavingMode()
-
-        // Set up phase transition observer for feedback
-        viewModel.phaseTransitionEvent.observe(this) { phase ->
-            phase?.let {
-                // Provide haptic and sound feedback at each phase transition
-                vibrationHelper.vibrateForPhase(it)
-                soundEffectHelper.playPhaseTransitionSound(it)
-            }
-        }
+        // Setup UI components
+        breathingUIController.setupPatternSpinner()
+        breathingUIController.setupCyclesControl()
+        breathingUIController.setupActionButtons()
+        breathingUIController.setupAccessibility()
+        breathingUIController.observeViewModelState()
 
         // Observe feedback settings
         viewModel.vibrationEnabled.observe(this) { enabled ->
@@ -148,37 +131,64 @@ class MainActivity : AppCompatActivity() {
         viewModel.soundEnabled.observe(this) { enabled ->
             soundEffectHelper.setSoundEnabled(enabled)
         }
+
+        // Observe screen wake state
+        viewModel.isRunning.observe(this) { isRunning ->
+            updateScreenWakeState(isRunning)
+        }
+
+        // Observe phase transitions for feedback
+        viewModel.phaseTransitionEvent.observe(this) { phase ->
+            phase?.let {
+                vibrationHelper.vibrateForPhase(it)
+                soundEffectHelper.playPhaseTransitionSound(it)
+            }
+        }
+
+        // Setup power saving mode
+        viewModel.setPowerSavingMode(BatteryOptimizationUtils.adaptToPowerSaving(this))
+
+        // Setup navigation buttons
+        setupNavigationButtons()
     }
 
-    private fun setupUIControllers() {
-        // Create and initialize UI controllers
-        breathingUIController = BreathingUIController(this, binding, viewModel)
+    private fun setupNavigationButtons() {
+        binding.settingsButton.setOnClickListener {
+            if (activeFragment == SETTINGS_FRAGMENT) {
+                hideSettingsFragment()
+            } else {
+                showSettingsFragment()
+            }
+        }
 
-        // Setup UI components and observers
-        breathingUIController.setupPatternSpinner()
-        breathingUIController.setupCyclesControl()
-        breathingUIController.setupActionButtons()
-        breathingUIController.setupAccessibility()
-        breathingUIController.observeViewModelState()
-    }
-
-    private fun checkBatteryOptimization() {
-        lifecycleScope.launch {
-            BatteryOptimizationUtils.requestDisableBatteryOptimization(this@MainActivity)
+        binding.habitTrackerButton.setOnClickListener {
+            if (activeFragment == HABIT_TRACKER_FRAGMENT) {
+                hideHabitTrackerFragment()
+            } else {
+                showHabitTrackerFragment()
+            }
         }
     }
 
     private fun setupBackPressHandling() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (fragmentManager.handleBackPress()) {
-                    // Fragment manager handled the back press
-                    return
+                when (activeFragment) {
+                    SETTINGS_FRAGMENT -> {
+                        hideSettingsFragment()
+                    }
+                    HABIT_TRACKER_FRAGMENT -> {
+                        hideHabitTrackerFragment()
+                    }
+                    REMINDER_SETTINGS_FRAGMENT -> {
+                        supportFragmentManager.popBackStack()
+                        activeFragment = NO_FRAGMENT
+                    }
+                    else -> {
+                        isEnabled = false
+                        onBackPressedDispatcher.onBackPressed()
+                    }
                 }
-
-                // Normal back behavior
-                isEnabled = false
-                onBackPressedDispatcher.onBackPressed()
             }
         })
     }
@@ -190,79 +200,101 @@ class MainActivity : AppCompatActivity() {
         if (isEnabled) {
             val hour = sharedPrefs.getInt("reminder_hour", 20)
             val minute = sharedPrefs.getInt("reminder_minute", 0)
-
-            val reminderHelper = ReminderNotificationHelper(this)
-            reminderHelper.scheduleDaily(hour, minute)
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == PERMISSION_REQUEST_CODE) {
-            // Reinitialize helpers after permission results
-            if (::vibrationHelper.isInitialized && ::soundEffectHelper.isInitialized) {
-                // Nothing to do - the helpers will check permissions internally
-            }
+            ReminderNotificationHelper(this).scheduleDaily(hour, minute)
         }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        orientationManager.handleConfigurationChange(newConfig)
+        updateLayoutForOrientation(newConfig.orientation)
+        breathingUIController.refreshUIState()
+    }
 
-        // Restore animation state after configuration change
-        animationManager.restoreAnimationState()
+    private fun updateLayoutForOrientation(orientation: Int) {
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            binding.breathingContent.root.visibility = View.GONE
+            binding.breathingContentLand.root.visibility = View.VISIBLE
+        } else {
+            binding.breathingContent.root.visibility = View.VISIBLE
+            binding.breathingContentLand.root.visibility = View.GONE
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        // Refresh UI state when returning to the app
         breathingUIController.refreshUIState()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-
-        // Clean up resources
-        if (::animationManager.isInitialized) {
-            lifecycle.removeObserver(animationManager)
-            animationManager.cleanup()
-        }
-
-        if (::powerSavingManager.isInitialized) {
-            powerSavingManager.cleanup()
-        }
-
-        // Clean up sound resources
         if (::soundEffectHelper.isInitialized) {
             soundEffectHelper.release()
         }
     }
 
-    // Public methods for fragment interaction
+    // Fragment management methods
     fun showSettingsFragment() {
-        fragmentManager.showSettingsFragment()
+        if (viewModel.isRunning.value == true) {
+            viewModel.toggleBreathing() // Stop the session first
+        }
+
+        hideBreathingContent()
+
+        val settingsFragment = SettingsFragment()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.contentContainer, settingsFragment)
+            .addToBackStack(null)
+            .commit()
+
+        binding.settingsIcon.setImageResource(R.drawable.ic_close)
+        activeFragment = SETTINGS_FRAGMENT
     }
 
     fun hideSettingsFragment() {
-        fragmentManager.hideSettingsFragment()
+        supportFragmentManager.popBackStack()
+        showBreathingContent()
+        binding.settingsIcon.setImageResource(R.drawable.ic_settings)
+        activeFragment = NO_FRAGMENT
     }
 
     fun showHabitTrackerFragment() {
-        fragmentManager.showHabitTrackerFragment()
+        if (viewModel.isRunning.value == true) {
+            viewModel.toggleBreathing() // Stop the session first
+        }
+
+        hideBreathingContent()
+
+        val habitTrackerFragment = HabitTrackerFragment()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.contentContainer, habitTrackerFragment)
+            .addToBackStack(null)
+            .commit()
+
+        binding.habitTrackerIcon.setImageResource(R.drawable.ic_close)
+        activeFragment = HABIT_TRACKER_FRAGMENT
     }
 
     fun hideHabitTrackerFragment() {
-        fragmentManager.hideHabitTrackerFragment()
+        supportFragmentManager.popBackStack()
+        showBreathingContent()
+        binding.habitTrackerIcon.setImageResource(R.drawable.ic_calendar)
+        activeFragment = NO_FRAGMENT
     }
 
     fun showReminderSettingsFragment() {
-        fragmentManager.showReminderSettingsFragment()
+        if (viewModel.isRunning.value == true) {
+            viewModel.toggleBreathing() // Stop the session first
+        }
+
+        hideBreathingContent()
+
+        val reminderSettingsFragment = ReminderSettingsFragment()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.contentContainer, reminderSettingsFragment)
+            .addToBackStack(null)
+            .commit()
+
+        activeFragment = REMINDER_SETTINGS_FRAGMENT
     }
 
     fun updateScreenWakeState(keepAwake: Boolean) {
@@ -270,6 +302,19 @@ class MainActivity : AppCompatActivity() {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         } else {
             window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
+
+    private fun hideBreathingContent() {
+        binding.breathingContent.root.visibility = View.GONE
+        binding.breathingContentLand.root.visibility = View.GONE
+    }
+
+    private fun showBreathingContent() {
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            binding.breathingContentLand.root.visibility = View.VISIBLE
+        } else {
+            binding.breathingContent.root.visibility = View.VISIBLE
         }
     }
 }

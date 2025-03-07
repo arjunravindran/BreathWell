@@ -11,7 +11,6 @@ import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
-import com.example.breathwell.MainActivity
 import com.example.breathwell.R
 import com.example.breathwell.databinding.ActivityMainBinding
 import com.example.breathwell.model.BreathPhase
@@ -28,7 +27,9 @@ class BreathingUIController(
     private val viewModel: BreathingViewModel
 ) {
     // Adapter for breathing pattern selection
-    private val breathingPatternAdapter by lazy { BreathingPatternAdapter(activity) }
+    private val breathingPatternAdapter by lazy {
+        BreathingPatternAdapter(activity, BreathingPattern.getAllPatterns())
+    }
 
     /**
      * Set up the breathing pattern spinner
@@ -80,20 +81,6 @@ class BreathingUIController(
         // Circular action button (Start/Stop)
         getCurrentCircularActionButton().setOnButtonClickListener {
             viewModel.toggleBreathing()
-        }
-
-        // Settings button
-        binding.settingsButton.setOnClickListener {
-            if (activity is MainActivity) {
-                activity.showSettingsFragment()
-            }
-        }
-
-        // Habit Tracker button
-        binding.habitTrackerButton.setOnClickListener {
-            if (activity is MainActivity) {
-                activity.showHabitTrackerFragment()
-            }
         }
     }
 
@@ -163,23 +150,26 @@ class BreathingUIController(
             if (position >= 0) {
                 getCurrentPatternSpinner().setSelection(position)
             }
-        viewModel.isRunning.observe(activity) { isRunning ->
-            // Only show timer when a session is running
-            getCurrentHALCircleView().showTimer = isRunning
-
-            // Rest of your existing isRunning observer code...
-        }
         }
 
         // Update breath phase, animation, and instructions
         viewModel.breathPhase.observe(activity) { phase ->
             updateInstructionText(phase)
 
+            // Update HAL circle properties
+            val halCircleView = getCurrentHALCircleView()
+            halCircleView.breathColor = viewModel.getBreathColor()
+            halCircleView.innerColor = viewModel.getInnerColor()
+
+            // Only show pulse animation during inhale and exhale phases
+            halCircleView.showPulseEffect =
+                phase == BreathPhase.INHALE || phase == BreathPhase.EXHALE
+
             // Announce phase change for accessibility
             phase?.let {
                 AccessibilityUtils.announceForAccessibility(
                     activity,
-                    getCurrentHALCircleView(),
+                    halCircleView,
                     it,
                     viewModel.counter.value ?: 0
                 )
@@ -196,14 +186,12 @@ class BreathingUIController(
             getCurrentHALCircleView().expansion = expansion
         }
 
-        // Update running state and control screen wakelock
+        // Update running state
         viewModel.isRunning.observe(activity) { isRunning ->
             updateActionButtonState(isRunning)
 
-            // Update screen wake state
-            if (activity is MainActivity) {
-                activity.updateScreenWakeState(isRunning)
-            }
+            // Only show timer when a session is running
+            getCurrentHALCircleView().showTimer = isRunning
         }
 
         // Update cycle counts
@@ -342,7 +330,11 @@ class BreathingUIController(
         }
     }
 
-    // Helper methods to get the appropriate UI component based on current layout
+    // Helper methods to get the current UI component based on visible layout
+    fun getCurrentHALCircleView() = when {
+        binding.breathingContent.root.isVisible -> binding.breathingContent.halCircleView
+        else -> binding.breathingContentLand.halCircleView
+    }
 
     private fun getCurrentPatternSpinner() = when {
         binding.breathingContent.root.isVisible -> binding.breathingContent.patternSpinnerView
@@ -364,11 +356,6 @@ class BreathingUIController(
         else -> binding.breathingContentLand.circularActionButton
     }
 
-    private fun getCurrentHALCircleView() = when {
-        binding.breathingContent.root.isVisible -> binding.breathingContent.halCircleView
-        else -> binding.breathingContentLand.halCircleView
-    }
-
     private fun getCurrentProgressRing() = when {
         binding.breathingContent.root.isVisible -> binding.breathingContent.progressRing
         else -> binding.breathingContentLand.progressRing
@@ -377,12 +364,10 @@ class BreathingUIController(
     /**
      * Adapter for the breathing pattern spinner
      */
-    private inner class BreathingPatternAdapter(context: Context) :
-        ArrayAdapter<BreathingPattern>(context, R.layout.item_spinner, mutableListOf()) {
-
-        init {
-            addAll(BreathingPattern.getAllPatterns())
-        }
+    private inner class BreathingPatternAdapter(
+        context: Context,
+        patterns: List<BreathingPattern>
+    ) : ArrayAdapter<BreathingPattern>(context, R.layout.item_spinner, patterns) {
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
             return createItemView(position, convertView, parent)
@@ -393,14 +378,18 @@ class BreathingUIController(
         }
 
         private fun createItemView(position: Int, convertView: View?, parent: ViewGroup): View {
-            val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.item_spinner, parent, false)
+            val view = convertView ?: LayoutInflater.from(context).inflate(
+                R.layout.item_spinner, parent, false
+            )
             val pattern = getItem(position)
             view.findViewById<TextView>(R.id.spinnerText).text = pattern?.name
             return view
         }
 
         private fun createDropDownItemView(position: Int, convertView: View?, parent: ViewGroup): View {
-            val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.item_spinner_dropdown, parent, false)
+            val view = convertView ?: LayoutInflater.from(context).inflate(
+                R.layout.item_spinner_dropdown, parent, false
+            )
             val pattern = getItem(position)
             view.findViewById<TextView>(R.id.spinnerText).text = pattern?.name
             return view

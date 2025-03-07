@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Breathing Circle Container - reduced height to make more room -->
+    <!-- Breathing Circle Container -->
     <FrameLayout
         android:id="@+id/circleContainer"
         android:layout_width="0dp"
@@ -17,22 +17,14 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/patternLabel">
 
-        <!-- Cycle Progress Ring - concentric with HAL Circle -->
+        <!-- Cycle Progress Ring -->
         <com.example.breathwell.ui.views.ProgressRingView
             android:id="@+id/progressRing"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center" />
 
-        <!-- Put the button next to appear behind the HAL circle -->
-        <com.example.breathwell.ui.views.CircularStartStopButton
-            android:id="@+id/circularActionButton"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_gravity="center"
-            android:contentDescription="@string/accessibility_start_session" />
-
-        <!-- HAL Circle View - 20% bigger through scaling -->
+        <!-- HAL Circle View -->
         <com.example.breathwell.ui.views.HALCircleView
             android:id="@+id/halCircleView"
             android:layout_width="match_parent"
@@ -42,7 +34,30 @@
             android:scaleY="0.9" />
     </FrameLayout>
 
-    <!-- Rest of the layout remains unchanged -->
+    <!-- Reset Button - Positioned on left side and moved down by 80dp -->
+    <com.example.breathwell.ui.views.CircularResetButton
+        android:id="@+id/resetButton"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="0dp"
+        android:layout_marginBottom="-20dp"
+        android:contentDescription="@string/accessibility_reset_session"
+        android:visibility="visible"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/circleContainer" />
+
+    <!-- Start/Stop Button - Positioned on right side and moved down by 80dp -->
+    <com.example.breathwell.ui.views.CircularStartStopButton
+        android:id="@+id/circularActionButton"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginEnd="0dp"
+        android:layout_marginBottom="-20dp"
+        android:contentDescription="@string/accessibility_start_session"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/circleContainer" />
+
+    <!-- Pattern selection -->
     <TextView
         android:id="@+id/patternLabel"
         android:layout_width="wrap_content"
@@ -88,7 +103,7 @@
             app:tint="@color/white" />
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Cycles Layout with Slider - moved up with more bottom margin -->
+    <!-- Cycles Layout with Slider -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cyclesLayout"
         android:layout_width="0dp"
@@ -110,7 +125,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Replace with custom number slider -->
         <com.example.breathwell.ui.views.CustomNumberSlider
             android:id="@+id/cyclesSlider"
             android:layout_width="0dp"
@@ -131,7 +145,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/cyclesLabel" />
 
-        <!-- No longer needed - number is displayed in thumb -->
         <TextView
             android:id="@+id/cyclesValueText"
             android:layout_width="0dp"
@@ -141,7 +154,7 @@
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Keep the original action button but make it invisible -->
+    <!-- Hidden action button for accessibility -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/actionButton"
         android:layout_width="0dp"

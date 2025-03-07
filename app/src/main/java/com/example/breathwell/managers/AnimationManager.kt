@@ -101,10 +101,7 @@ class AnimationManager(
         // Pause any active animations when app goes to background
         // Store state in ViewModel for later restoration
         val halCircleView = getCurrentHALCircleView()
-        viewModel.saveAnimationState(
-            halCircleView.expansion,
-            halCircleView.showPulseEffect
-        )
+        viewModel.saveAnimationState(halCircleView.expansion)
 
         // Pause animations
         halCircleView.pauseAnimations()

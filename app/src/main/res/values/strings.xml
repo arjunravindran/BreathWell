@@ -5,6 +5,7 @@
     <string name="cycles">Cycles</string>
     <string name="start">START</string>
     <string name="stop">STOP</string>
+    <string name="reset">RESET</string>
     <string name="start_new_session">START NEW SESSION</string>
     <string name="app_footer">AEROPOWER • MINDFUL BREATHING</string>
     <string name="inhale">INHALE</string>
@@ -53,6 +54,8 @@
     <string name="accessibility_open_reminders">Open reminders</string>
     <string name="accessibility_start_session">Start breathing session</string>
     <string name="accessibility_stop_session">Stop breathing session</string>
+    <string name="accessibility_reset_session">Reset breathing session</string>
+    <string name="accessibility_start_new_session">Start new breathing session</string>
     <string name="accessibility_expand_dropdown">Expand dropdown</string>
     <string name="accessibility_cycles_slider">Adjust number of cycles</string>
 

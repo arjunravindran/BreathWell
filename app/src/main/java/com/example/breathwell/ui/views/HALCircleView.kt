@@ -14,7 +14,6 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
-import com.example.breathwell.utils.AnimationQuality
 import kotlin.math.min
 import androidx.core.graphics.toColorInt
 
@@ -24,43 +23,36 @@ class HALCircleView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    // Paint objects
-    private val circlePaint = Paint().apply {
-        isAntiAlias = true
+    // Paint objects for various components
+    private val circlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
         color = "#00A6ED".toColorInt() // Default blue
     }
 
-    private val outerRingPaint = Paint().apply {
-        isAntiAlias = true
+    private val outerRingPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeWidth = dpToPx(2f)
         color = Color.WHITE
         alpha = 80 // 30% opacity
     }
 
-    private val innerCirclePaint = Paint().apply {
-        isAntiAlias = true
+    private val innerCirclePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
         color = "#0076AD".toColorInt() // Darker blue
     }
 
-    private val glowPaint = Paint().apply {
-        isAntiAlias = true
+    private val glowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
     }
 
-    private val timerPaint = Paint().apply {
-        isAntiAlias = true
+    private val timerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
         textAlign = Paint.Align.CENTER
         textSize = spToPx(64f) // Larger text size for better visibility
         typeface = Typeface.DEFAULT_BOLD
-        alpha = 255 // Full opacity for clear visibility
     }
 
-    private val instructionPaint = Paint().apply {
-        isAntiAlias = true
+    private val instructionPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
         textAlign = Paint.Align.CENTER
         textSize = spToPx(24f)
@@ -72,10 +64,10 @@ class HALCircleView @JvmOverloads constructor(
     // Animation properties
     private var pulseAnimator: ValueAnimator? = null
     private var pulseScale = 1.0f
-    private var animationQuality = AnimationQuality.FULL
     private var animationDuration = 1500L // Default animation duration
     private var wasAnimating = false
 
+    // Public properties
     var expansion: Float = 50f
         set(value) {
             field = value
@@ -165,14 +157,7 @@ class HALCircleView @JvmOverloads constructor(
     private fun startPulseAnimation() {
         pulseAnimator?.cancel()
 
-        // Adjust animation based on quality
-        val amplitude = when (animationQuality) {
-            AnimationQuality.FULL -> 0.15f
-            AnimationQuality.REDUCED -> 0.10f
-            AnimationQuality.MINIMAL -> 0.05f
-        }
-
-        pulseAnimator = ValueAnimator.ofFloat(1.0f, 1.0f + amplitude).apply {
+        pulseAnimator = ValueAnimator.ofFloat(1.0f, 1.15f).apply {
             duration = animationDuration
             repeatCount = ValueAnimator.INFINITE
             repeatMode = ValueAnimator.REVERSE
@@ -197,31 +182,26 @@ class HALCircleView @JvmOverloads constructor(
 
         // Calculate circle dimensions
         val minDimension = min(width, height)
-        // Increase expansion effect by using a larger base radius
-        val baseRadius = minDimension * 0.3f // Changed from 0.245f for more dramatic expansion
-        // Make expansion range wider
-        val outerRadius = baseRadius * (1.0f + (expansion - 50f) / 120f) // Changed from 150f for wider range
+        val baseRadius = minDimension * 0.3f
+        val outerRadius = baseRadius * (1.0f + (expansion - 50f) / 120f)
         val innerRadius = outerRadius * 0.6f
 
         // Apply pulse animation
         val animatedOuterRadius = outerRadius * pulseScale
 
-        // Only draw glow in FULL and REDUCED quality
-        if (animationQuality != AnimationQuality.MINIMAL) {
-            // Create radial gradient for the glow effect
-            val gradient = RadialGradient(
-                centerX,
-                centerY,
-                animatedOuterRadius * 1.3f,
-                intArrayOf(breathColor, Color.TRANSPARENT),
-                floatArrayOf(0.7f, 1.0f),
-                Shader.TileMode.CLAMP
-            )
-            glowPaint.shader = gradient
+        // Create radial gradient for the glow effect
+        val gradient = RadialGradient(
+            centerX,
+            centerY,
+            animatedOuterRadius * 1.3f,
+            intArrayOf(breathColor, Color.TRANSPARENT),
+            floatArrayOf(0.7f, 1.0f),
+            Shader.TileMode.CLAMP
+        )
+        glowPaint.shader = gradient
 
-            // Draw outer glow
-            canvas.drawCircle(centerX, centerY, animatedOuterRadius * 1.3f, glowPaint)
-        }
+        // Draw outer glow
+        canvas.drawCircle(centerX, centerY, animatedOuterRadius * 1.3f, glowPaint)
 
         // Draw main circle
         canvas.drawCircle(centerX, centerY, animatedOuterRadius, circlePaint)

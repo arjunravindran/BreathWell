@@ -26,8 +26,6 @@ class BreathingViewModel(
     // Keys for saved state
     private companion object {
         const val KEY_EXPANSION = "circle_expansion"
-        const val KEY_PULSE_EFFECT = "show_pulse_effect"
-        const val KEY_CIRCLE_STATE = "circle_state"
         const val KEY_CURRENT_CYCLE = "current_cycle"
         const val KEY_IS_RUNNING = "is_running"
         const val KEY_PHASE = "breath_phase"
@@ -88,10 +86,6 @@ class BreathingViewModel(
     // Phase transition event - used to notify for sound/vibration
     val phaseTransitionEvent = MutableLiveData<BreathPhase?>()
 
-    // Animation state properties for restoration
-    private var wasAnimatingBeforeStop = false
-    private var lastAnimationTimestamp = 0L
-
     // New properties for habit tracking
     private val _sessionCompleted = MutableLiveData<Boolean>(false)
     val sessionCompleted: LiveData<Boolean> = _sessionCompleted
@@ -126,21 +120,14 @@ class BreathingViewModel(
     /**
      * Save animation state for restoration after config changes
      */
-    fun saveAnimationState(expansion: Float, showPulseEffect: Boolean) {
+    fun saveAnimationState(expansion: Float) {
         savedStateHandle.set(KEY_EXPANSION, expansion)
-        savedStateHandle.set(KEY_PULSE_EFFECT, showPulseEffect)
-        savedStateHandle.set(KEY_CIRCLE_STATE, pulseScale)
         savedStateHandle.set(KEY_CURRENT_CYCLE, _currentCycle.value)
         savedStateHandle.set(KEY_IS_RUNNING, _isRunning.value)
         savedStateHandle.set(KEY_PHASE, _breathPhase.value)
         savedStateHandle.set(KEY_VIBRATION_ENABLED, _vibrationEnabled.value)
         savedStateHandle.set(KEY_SOUND_ENABLED, _soundEnabled.value)
     }
-
-    /**
-     * Animation state for restoring after config changes
-     */
-    private var pulseScale: Float = 1.0f
 
     // Set power saving mode
     fun setPowerSavingMode(mode: PowerSavingMode) {
@@ -188,17 +175,12 @@ class BreathingViewModel(
     }
 
     private fun stopBreathing() {
-        wasAnimatingBeforeStop = countdownController != null || circleAnimator != null
         countdownController.cancelCountdown()
         circleAnimator?.cancel()
         circleAnimator = null
 
         // Save state before stopping
-        if (wasAnimatingBeforeStop) {
-            lastAnimationTimestamp = System.currentTimeMillis()
-            saveAnimationState(_circleExpansion.value ?: 50f,
-                _breathPhase.value == BreathPhase.INHALE || _breathPhase.value == BreathPhase.EXHALE)
-        }
+        saveAnimationState(_circleExpansion.value ?: 50f)
 
         _isRunning.value = false
         savedStateHandle.set(KEY_IS_RUNNING, false)
@@ -250,52 +232,60 @@ class BreathingViewModel(
     }
 
     private fun advanceToNextPhase() {
-        val nextPhase = when (_breathPhase.value) {
+        val currentPhase = _breathPhase.value ?: BreathPhase.READY
+        var nextPhase: BreathPhase? = null
+
+        when (currentPhase) {
             BreathPhase.READY -> {
+                nextPhase = BreathPhase.INHALE
                 startInhalePhase()
-                BreathPhase.INHALE
             }
             BreathPhase.INHALE -> {
                 if ((_activePattern.value?.hold1 ?: 0) > 0) {
+                    nextPhase = BreathPhase.HOLD1
                     startHold1Phase()
-                    BreathPhase.HOLD1
                 } else {
+                    nextPhase = BreathPhase.EXHALE
                     startExhalePhase()
-                    BreathPhase.EXHALE
                 }
             }
             BreathPhase.HOLD1 -> {
+                nextPhase = BreathPhase.EXHALE
                 startExhalePhase()
-                BreathPhase.EXHALE
             }
             BreathPhase.EXHALE -> {
                 if ((_activePattern.value?.hold2 ?: 0) > 0) {
+                    nextPhase = BreathPhase.HOLD2
                     startHold2Phase()
-                    BreathPhase.HOLD2
                 } else {
                     advanceCycle()
                     if (_currentCycle.value == _totalCycles.value) {
-                        BreathPhase.COMPLETE
+                        nextPhase = BreathPhase.COMPLETE
                     } else {
-                        BreathPhase.INHALE
+                        nextPhase = BreathPhase.INHALE
+                        startInhalePhase()
                     }
                 }
             }
             BreathPhase.HOLD2 -> {
                 advanceCycle()
                 if (_currentCycle.value == _totalCycles.value) {
-                    BreathPhase.COMPLETE
+                    nextPhase = BreathPhase.COMPLETE
                 } else {
-                    BreathPhase.INHALE
+                    nextPhase = BreathPhase.INHALE
+                    startInhalePhase()
                 }
             }
-            else -> null  // No action for COMPLETE
+            BreathPhase.COMPLETE -> {
+                // No action for COMPLETE
+            }
         }
 
         // Trigger phase transition event for sound/vibration
         nextPhase?.let {
+            _breathPhase.value = it
+            savedStateHandle.set(KEY_PHASE, it)
             phaseTransitionEvent.value = it
-            // Reset after event is consumed
             phaseTransitionEvent.value = null
         }
     }
@@ -309,21 +299,16 @@ class BreathingViewModel(
         } else {
             _currentCycle.value = currentCycleValue + 1
             savedStateHandle.set(KEY_CURRENT_CYCLE, _currentCycle.value)
-            startInhalePhase()
         }
     }
 
     private fun startInhalePhase() {
-        _breathPhase.value = BreathPhase.INHALE
-        savedStateHandle.set(KEY_PHASE, BreathPhase.INHALE)
         val inhaleDuration = _activePattern.value?.inhale ?: 4
         countdownController.startCountdown(inhaleDuration)
         animateCircle(30f, 95f, _activePattern.value?.inhale?.times(1000L) ?: 4000L)
     }
 
     private fun startHold1Phase() {
-        _breathPhase.value = BreathPhase.HOLD1
-        savedStateHandle.set(KEY_PHASE, BreathPhase.HOLD1)
         val holdDuration = _activePattern.value?.hold1 ?: 0
         countdownController.startCountdown(holdDuration)
         // Keep expanded at 95%
@@ -332,16 +317,12 @@ class BreathingViewModel(
     }
 
     private fun startExhalePhase() {
-        _breathPhase.value = BreathPhase.EXHALE
-        savedStateHandle.set(KEY_PHASE, BreathPhase.EXHALE)
         val exhaleDuration = _activePattern.value?.exhale ?: 4
         countdownController.startCountdown(exhaleDuration)
         animateCircle(95f, 30f, _activePattern.value?.exhale?.times(1000L) ?: 4000L)
     }
 
     private fun startHold2Phase() {
-        _breathPhase.value = BreathPhase.HOLD2
-        savedStateHandle.set(KEY_PHASE, BreathPhase.HOLD2)
         val hold2Duration = _activePattern.value?.hold2 ?: 0
         countdownController.startCountdown(hold2Duration)
         // Keep contracted at 30%
