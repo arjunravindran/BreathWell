@@ -147,7 +147,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Setup power saving mode
-        //viewModel.setPowerSavingMode(BatteryOptimizationUtils.adaptToPowerSaving(this))
+        viewModel.setPowerSavingMode(BatteryOptimizationUtils.adaptToPowerSaving(this))
 
         // Setup navigation buttons
         setupNavigationButtons()
