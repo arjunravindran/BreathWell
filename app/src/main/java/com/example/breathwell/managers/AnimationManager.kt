@@ -121,11 +121,4 @@ class AnimationManager(
         }
     }
 
-    /**
-     * Clean up resources to prevent leaks
-     */
-    fun cleanup() {
-        // Remove observers
-        viewModel.breathPhase.removeObserver(phaseObserver)
-    }
 }

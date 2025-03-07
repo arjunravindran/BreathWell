@@ -95,7 +95,7 @@ class CircularResetButton @JvmOverloads constructor(
         resetPath.reset()
 
         // Draw arrow (simplified refresh icon)
-        val arrowPath = Path()
+        Path()
 
         // Start at the 12 o'clock position
         resetPath.moveTo(centerX, centerY - iconSize)
