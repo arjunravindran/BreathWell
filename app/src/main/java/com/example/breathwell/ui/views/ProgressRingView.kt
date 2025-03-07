@@ -2,15 +2,14 @@ package com.example.breathwell.ui.views
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
-import kotlin.math.min
 import androidx.core.graphics.toColorInt
 import androidx.core.graphics.withRotation
+import kotlin.math.min
 
 class ProgressRingView @JvmOverloads constructor(
     context: Context,

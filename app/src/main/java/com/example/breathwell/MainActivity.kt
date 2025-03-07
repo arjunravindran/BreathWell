@@ -122,7 +122,7 @@ class MainActivity : AppCompatActivity() {
         animationManager = AnimationManager(binding, viewModel)
 
         // Initialize feedback helpers
-        soundEffectHelper = SoundEffectHelper(this)
+        soundEffectHelper = SoundEffectHelper()
         vibrationHelper = VibrationHelper(this)
 
         // Add animation manager as lifecycle observer for proper state handling

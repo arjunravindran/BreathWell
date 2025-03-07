@@ -8,6 +8,7 @@ import com.example.breathwell.viewmodel.BreathingViewModel
 import androidx.lifecycle.Observer
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.core.view.isVisible
 
 /**
  * Manages animations and visual effects in the application
@@ -41,7 +42,7 @@ class AnimationManager(
 
         // Restore circle expansion
         viewModel.circleExpansion.value?.let { expansion ->
-            getCurrentHALCircleView()?.expansion = expansion
+            getCurrentHALCircleView().expansion = expansion
         }
 
         // Update background gradient based on current state
@@ -55,14 +56,14 @@ class AnimationManager(
         if (phase == null) return
 
         // Update breath colors
-        getCurrentHALCircleView()?.breathColor = viewModel.getBreathColor()
-        getCurrentHALCircleView()?.innerColor = viewModel.getInnerColor()
+        getCurrentHALCircleView().breathColor = viewModel.getBreathColor()
+        getCurrentHALCircleView().innerColor = viewModel.getInnerColor()
 
         // Update background gradient
         updateBackgroundGradient()
 
         // Only show pulse animation during inhale and exhale phases
-        getCurrentHALCircleView()?.showPulseEffect =
+        getCurrentHALCircleView().showPulseEffect =
             phase == BreathPhase.INHALE || phase == BreathPhase.EXHALE
     }
 
@@ -88,7 +89,7 @@ class AnimationManager(
      * Get the currently visible HAL circle view
      */
     private fun getCurrentHALCircleView() = when {
-        binding.breathingContent.root.visibility == android.view.View.VISIBLE ->
+        binding.breathingContent.root.isVisible ->
             binding.breathingContent.halCircleView
         else -> binding.breathingContentLand.halCircleView
     }
@@ -101,12 +102,12 @@ class AnimationManager(
         // Store state in ViewModel for later restoration
         val halCircleView = getCurrentHALCircleView()
         viewModel.saveAnimationState(
-            halCircleView?.expansion ?: 50f,
-            halCircleView?.showPulseEffect ?: false
+            halCircleView.expansion,
+            halCircleView.showPulseEffect
         )
 
         // Pause animations
-        halCircleView?.pauseAnimations()
+        halCircleView.pauseAnimations()
     }
 
     /**
@@ -119,7 +120,7 @@ class AnimationManager(
         // Resume animations if needed
         if (viewModel.isRunning.value == true) {
             val halCircleView = getCurrentHALCircleView()
-            halCircleView?.resumeAnimations()
+            halCircleView.resumeAnimations()
         }
     }
 

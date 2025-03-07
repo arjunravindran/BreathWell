@@ -5,7 +5,6 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
-import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -38,7 +37,6 @@ class CircularStartStopButton @JvmOverloads constructor(
         alpha = 40
     }
 
-    private val rect = RectF()
     private var isPressed = false
     private var isPlaying = false
     private var onClickListener: (() -> Unit)? = null

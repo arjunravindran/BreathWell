@@ -10,12 +10,12 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import com.example.breathwell.MainActivity
 import com.example.breathwell.R
 import com.example.breathwell.databinding.ActivityMainBinding
 import com.example.breathwell.model.BreathPhase
 import com.example.breathwell.model.BreathingPattern
-import com.example.breathwell.ui.views.CustomNumberSlider
 import com.example.breathwell.utils.AccessibilityUtils
 import com.example.breathwell.viewmodel.BreathingViewModel
 
@@ -34,7 +34,7 @@ class BreathingUIController(
      * Set up the breathing pattern spinner
      */
     fun setupPatternSpinner() {
-        val spinner = getCurrentPatternSpinner() ?: return
+        val spinner = getCurrentPatternSpinner()
         spinner.adapter = breathingPatternAdapter
 
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -54,7 +54,7 @@ class BreathingUIController(
      */
     fun setupCyclesControl() {
         // Get reference to the slider
-        val cyclesSlider = getCurrentCyclesSlider() ?: return
+        val cyclesSlider = getCurrentCyclesSlider()
 
         // Set initial value
         cyclesSlider.value = viewModel.totalCycles.value?.toFloat() ?: 5f
@@ -73,12 +73,12 @@ class BreathingUIController(
      */
     fun setupActionButtons() {
         // Original button (invisibly handling accessibility)
-        getCurrentActionButton()?.setOnClickListener {
+        getCurrentActionButton().setOnClickListener {
             viewModel.toggleBreathing()
         }
 
         // Circular action button (Start/Stop)
-        getCurrentCircularActionButton()?.setOnButtonClickListener {
+        getCurrentCircularActionButton().setOnButtonClickListener {
             viewModel.toggleBreathing()
         }
 
@@ -126,7 +126,7 @@ class BreathingUIController(
         )
 
         // Setup accessibility for action buttons
-        getCurrentActionButton()?.let { button ->
+        getCurrentActionButton().let { button ->
             AccessibilityUtils.setupAccessibilityForButton(
                 button,
                 activity.getString(if (viewModel.isRunning.value == true) R.string.stop else R.string.start),
@@ -135,7 +135,7 @@ class BreathingUIController(
         }
 
         // Also setup accessibility for circular action button
-        getCurrentCircularActionButton()?.let { button ->
+        getCurrentCircularActionButton().let { button ->
             AccessibilityUtils.setupAccessibilityForButton(
                 button,
                 activity.getString(if (viewModel.isRunning.value == true) R.string.stop else R.string.start),
@@ -144,7 +144,7 @@ class BreathingUIController(
         }
 
         // Setup accessibility for the slider
-        getCurrentCyclesSlider()?.let { slider ->
+        getCurrentCyclesSlider().let { slider ->
             AccessibilityUtils.setupAccessibilityForButton(
                 slider,
                 activity.getString(R.string.cycles),
@@ -161,7 +161,7 @@ class BreathingUIController(
         viewModel.activePattern.observe(activity) { pattern ->
             val position = breathingPatternAdapter.getPosition(pattern)
             if (position >= 0) {
-                getCurrentPatternSpinner()?.setSelection(position)
+                getCurrentPatternSpinner().setSelection(position)
             }
         viewModel.isRunning.observe(activity) { isRunning ->
             // Only show timer when a session is running
@@ -208,12 +208,12 @@ class BreathingUIController(
 
         // Update cycle counts
         viewModel.totalCycles.observe(activity) { cycles ->
-            getCurrentCyclesSlider()?.value = cycles.toFloat()
-            getCurrentProgressRing()?.totalCycles = cycles
+            getCurrentCyclesSlider().value = cycles.toFloat()
+            getCurrentProgressRing().totalCycles = cycles
         }
 
         viewModel.currentCycle.observe(activity) { cycle ->
-            getCurrentProgressRing()?.currentCycle = cycle
+            getCurrentProgressRing().currentCycle = cycle
         }
     }
 
@@ -252,10 +252,10 @@ class BreathingUIController(
      * Update action button state based on running state
      */
     private fun updateActionButtonState(isRunning: Boolean) {
-        val button = getCurrentActionButton() ?: return
-        val circularButton = getCurrentCircularActionButton() ?: return
-        val spinner = getCurrentPatternSpinner() ?: return
-        val cyclesSlider = getCurrentCyclesSlider() ?: return
+        val button = getCurrentActionButton()
+        val circularButton = getCurrentCircularActionButton()
+        val spinner = getCurrentPatternSpinner()
+        val cyclesSlider = getCurrentCyclesSlider()
 
         if (isRunning) {
             // Original button styling (still needed for accessibility)
@@ -325,12 +325,12 @@ class BreathingUIController(
         viewModel.activePattern.value?.let { pattern ->
             val position = breathingPatternAdapter.getPosition(pattern)
             if (position >= 0) {
-                getCurrentPatternSpinner()?.setSelection(position)
+                getCurrentPatternSpinner().setSelection(position)
             }
         }
 
         viewModel.totalCycles.value?.let { cycles ->
-            getCurrentCyclesSlider()?.value = cycles.toFloat()
+            getCurrentCyclesSlider().value = cycles.toFloat()
         }
 
         viewModel.breathPhase.value?.let { phase ->
@@ -345,32 +345,32 @@ class BreathingUIController(
     // Helper methods to get the appropriate UI component based on current layout
 
     private fun getCurrentPatternSpinner() = when {
-        binding.breathingContent.root.visibility == View.VISIBLE -> binding.breathingContent.patternSpinnerView
+        binding.breathingContent.root.isVisible -> binding.breathingContent.patternSpinnerView
         else -> binding.breathingContentLand.patternSpinnerView
     }
 
     private fun getCurrentCyclesSlider() = when {
-        binding.breathingContent.root.visibility == View.VISIBLE -> binding.breathingContent.cyclesSlider as? CustomNumberSlider
-        else -> binding.breathingContentLand.cyclesSlider as? CustomNumberSlider
+        binding.breathingContent.root.isVisible -> binding.breathingContent.cyclesSlider
+        else -> binding.breathingContentLand.cyclesSlider
     }
 
     private fun getCurrentActionButton() = when {
-        binding.breathingContent.root.visibility == View.VISIBLE -> binding.breathingContent.actionButton
+        binding.breathingContent.root.isVisible -> binding.breathingContent.actionButton
         else -> binding.breathingContentLand.actionButton
     }
 
     private fun getCurrentCircularActionButton() = when {
-        binding.breathingContent.root.visibility == View.VISIBLE -> binding.breathingContent.circularActionButton
+        binding.breathingContent.root.isVisible -> binding.breathingContent.circularActionButton
         else -> binding.breathingContentLand.circularActionButton
     }
 
     private fun getCurrentHALCircleView() = when {
-        binding.breathingContent.root.visibility == View.VISIBLE -> binding.breathingContent.halCircleView
+        binding.breathingContent.root.isVisible -> binding.breathingContent.halCircleView
         else -> binding.breathingContentLand.halCircleView
     }
 
     private fun getCurrentProgressRing() = when {
-        binding.breathingContent.root.visibility == View.VISIBLE -> binding.breathingContent.progressRing
+        binding.breathingContent.root.isVisible -> binding.breathingContent.progressRing
         else -> binding.breathingContentLand.progressRing
     }
 

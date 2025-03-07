@@ -2,8 +2,6 @@ package com.example.breathwell.utils
 
 import android.os.CountDownTimer
 import android.util.Log
-import com.example.breathwell.model.BreathPhase
-import com.example.breathwell.utils.PowerSavingMode
 
 /**
  * Controller class to handle countdown timing for breathing exercises

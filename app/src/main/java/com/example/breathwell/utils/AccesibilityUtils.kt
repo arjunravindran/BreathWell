@@ -2,7 +2,6 @@ package com.example.breathwell.utils
 
 import android.content.Context
 import android.view.View
-import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityManager
 import android.widget.ImageView
 import androidx.core.view.AccessibilityDelegateCompat
@@ -63,10 +62,4 @@ object AccessibilityUtils {
         return am.isEnabled
     }
 
-    /**
-     * Configure accessibility focus events for important state changes
-     */
-    fun sendAccessibilityFocusEvent(view: View) {
-        view.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED)
-    }
 }

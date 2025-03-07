@@ -56,37 +56,12 @@ class PowerSavingManager(
      */
     private fun applyPowerSavingSettings() {
         // Update animation refresh rates
-        val updateInterval = BatteryOptimizationUtils.getRecommendedUpdateInterval(currentPowerSavingMode)
+        BatteryOptimizationUtils.getRecommendedUpdateInterval(currentPowerSavingMode)
         
         // We don't directly access UI components - the ViewModel will handle that
         // when observing the powerSavingMode LiveData
     }
-    
-    /**
-     * Get current animation quality setting
-     */
-    fun getCurrentAnimationQuality(): AnimationQuality {
-        return currentAnimationQuality
-    }
-    
-    /**
-     * Check if device is in power saving mode
-     */
-    fun isInPowerSavingMode(): Boolean {
-        return currentPowerSavingMode != PowerSavingMode.NONE
-    }
-    
-    /**
-     * Force update power saving mode
-     * Should be called when device power saving mode changes
-     */
-    fun updatePowerSavingMode() {
-        val newMode = BatteryOptimizationUtils.adaptToPowerSaving(context)
-        if (newMode != currentPowerSavingMode) {
-            viewModel.setPowerSavingMode(newMode)
-        }
-    }
-    
+
     /**
      * Clean up resources
      */

@@ -45,38 +45,23 @@ class VibrationHelper(private val context: Context) {
      * Mild vibration for standard phase changes
      */
     private fun vibrateMild() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator?.vibrate(VibrationEffect.createOneShot(80, VibrationEffect.DEFAULT_AMPLITUDE))
-        } else {
-            @Suppress("DEPRECATION")
-            vibrator?.vibrate(80)
-        }
+        vibrator?.vibrate(VibrationEffect.createOneShot(80, VibrationEffect.DEFAULT_AMPLITUDE))
     }
     
     /**
      * Short vibration for hold phases
      */
     private fun vibrateShort() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator?.vibrate(VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE))
-        } else {
-            @Suppress("DEPRECATION")
-            vibrator?.vibrate(40)
-        }
+        vibrator?.vibrate(VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE))
     }
     
     /**
      * Stronger vibration pattern for session completion
      */
     private fun vibrateCompletion() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Pattern: 0ms delay, 100ms vibrate, 100ms off, 100ms vibrate, 100ms off, 200ms vibrate
-            val pattern = longArrayOf(0, 100, 100, 100, 100, 200)
-            vibrator?.vibrate(VibrationEffect.createWaveform(pattern, -1))
-        } else {
-            @Suppress("DEPRECATION")
-            vibrator?.vibrate(longArrayOf(0, 100, 100, 100, 100, 200), -1)
-        }
+        // Pattern: 0ms delay, 100ms vibrate, 100ms off, 100ms vibrate, 100ms off, 200ms vibrate
+        val pattern = longArrayOf(0, 100, 100, 100, 100, 200)
+        vibrator?.vibrate(VibrationEffect.createWaveform(pattern, -1))
     }
     
     /**

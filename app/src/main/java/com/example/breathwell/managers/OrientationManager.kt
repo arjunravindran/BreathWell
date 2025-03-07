@@ -82,17 +82,4 @@ class OrientationManager(
         breathingUIController.refreshUIState()
     }
 
-    /**
-     * Check if currently in landscape mode
-     */
-    fun isInLandscapeMode(): Boolean {
-        return currentOrientation == Configuration.ORIENTATION_LANDSCAPE
-    }
-
-    /**
-     * Get current orientation
-     */
-    fun getCurrentOrientation(): Int {
-        return currentOrientation
-    }
 }

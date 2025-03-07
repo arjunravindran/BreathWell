@@ -1,6 +1,5 @@
 package com.example.breathwell.utils
 
-import android.content.Context
 import android.media.AudioManager
 import android.media.ToneGenerator
 import android.util.Log
@@ -10,7 +9,7 @@ import com.example.breathwell.model.BreathPhase
  * Helper class for playing sound effects during breathing exercises
  * Uses Android's built-in system tones
  */
-class SoundEffectHelper(private val context: Context) {
+class SoundEffectHelper {
 
     // ToneGenerator for system sounds
     private var toneGenerator: ToneGenerator? = null

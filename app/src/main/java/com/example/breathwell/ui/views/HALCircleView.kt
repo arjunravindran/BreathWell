@@ -16,6 +16,7 @@ import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import com.example.breathwell.utils.AnimationQuality
 import kotlin.math.min
+import androidx.core.graphics.toColorInt
 
 class HALCircleView @JvmOverloads constructor(
     context: Context,
@@ -27,7 +28,7 @@ class HALCircleView @JvmOverloads constructor(
     private val circlePaint = Paint().apply {
         isAntiAlias = true
         style = Paint.Style.FILL
-        color = Color.parseColor("#00A6ED") // Default blue
+        color = "#00A6ED".toColorInt() // Default blue
     }
 
     private val outerRingPaint = Paint().apply {
@@ -41,7 +42,7 @@ class HALCircleView @JvmOverloads constructor(
     private val innerCirclePaint = Paint().apply {
         isAntiAlias = true
         style = Paint.Style.FILL
-        color = Color.parseColor("#0076AD") // Darker blue
+        color = "#0076AD".toColorInt() // Darker blue
     }
 
     private val glowPaint = Paint().apply {
@@ -81,14 +82,14 @@ class HALCircleView @JvmOverloads constructor(
             invalidate()
         }
 
-    var breathColor: Int = Color.parseColor("#00A6ED")
+    var breathColor: Int = "#00A6ED".toColorInt()
         set(value) {
             field = value
             circlePaint.color = value
             invalidate()
         }
 
-    var innerColor: Int = Color.parseColor("#0076AD")
+    var innerColor: Int = "#0076AD".toColorInt()
         set(value) {
             field = value
             innerCirclePaint.color = value
@@ -127,40 +128,6 @@ class HALCircleView @JvmOverloads constructor(
             field = value
             invalidate()
         }
-
-    /**
-     * Set animation quality based on power saving mode
-     */
-    fun setAnimationQuality(quality: AnimationQuality) {
-        if (animationQuality == quality) return
-
-        animationQuality = quality
-
-        // Adjust animation parameters based on quality
-        when (quality) {
-            AnimationQuality.FULL -> {
-                animationDuration = 1500L
-                instructionPaint.alpha = 230
-                timerPaint.alpha = 255
-            }
-            AnimationQuality.REDUCED -> {
-                animationDuration = 2000L
-                instructionPaint.alpha = 220
-                timerPaint.alpha = 240
-            }
-            AnimationQuality.MINIMAL -> {
-                animationDuration = 2500L
-                instructionPaint.alpha = 210
-                timerPaint.alpha = 230
-            }
-        }
-
-        // Update ongoing animation if needed
-        if (showPulseEffect) {
-            pulseAnimator?.cancel()
-            startPulseAnimation()
-        }
-    }
 
     /**
      * Pause all ongoing animations
@@ -320,8 +287,8 @@ class HALCircleView @JvmOverloads constructor(
 
     private class SavedState : BaseSavedState {
         var expansion: Float = 50f
-        var breathColor: Int = Color.parseColor("#00A6ED")
-        var innerColor: Int = Color.parseColor("#0076AD")
+        var breathColor: Int = "#00A6ED".toColorInt()
+        var innerColor: Int = "#0076AD".toColorInt()
         var counter: Int = 0
         var instruction: String = "READY"
         var showPulseEffect: Boolean = false

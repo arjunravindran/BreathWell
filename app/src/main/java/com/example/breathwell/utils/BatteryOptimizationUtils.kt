@@ -3,10 +3,10 @@ package com.example.breathwell.utils
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.appcompat.app.AlertDialog
+import androidx.core.net.toUri
 
 // Enums defined at top of file
 enum class PowerSavingMode {
@@ -30,7 +30,7 @@ object BatteryOptimizationUtils {
     /**
      * Checks if the app is exempt from battery optimizations
      */
-    fun isIgnoringBatteryOptimizations(context: Context): Boolean {
+    private fun isIgnoringBatteryOptimizations(context: Context): Boolean {
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
         val packageName = context.packageName
         return powerManager.isIgnoringBatteryOptimizations(packageName)
@@ -49,7 +49,7 @@ object BatteryOptimizationUtils {
             .setPositiveButton("Disable Optimization") { _, _ ->
                 val intent = Intent().apply {
                     action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-                    data = Uri.parse("package:${activity.packageName}")
+                    data = "package:${activity.packageName}".toUri()
                 }
                 activity.startActivity(intent)
             }
@@ -60,7 +60,7 @@ object BatteryOptimizationUtils {
     /**
      * Low-power mode detection
      */
-    fun isInPowerSaveMode(context: Context): Boolean {
+    private fun isInPowerSaveMode(context: Context): Boolean {
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
         return powerManager.isPowerSaveMode
     }
