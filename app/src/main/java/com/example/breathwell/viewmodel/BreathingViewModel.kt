@@ -463,7 +463,7 @@ class BreathingViewModel(
             BreathPhase.HOLD1 -> "#38E1FF".toColorInt() // Cyan for hold after inhale (was blue)
             BreathPhase.EXHALE -> "#00D084".toColorInt() // Bright green for exhale
             BreathPhase.HOLD2 -> "#00A66A".toColorInt() // Deeper green for hold after exhale
-            else -> "#4682B4".toColorInt() // Default blue
+            else -> "#38E1FF".toColorInt() // Default blue
         }
     }
 
@@ -474,7 +474,7 @@ class BreathingViewModel(
             BreathPhase.HOLD1 -> "#00D4FF".toColorInt() // Darker cyan for hold after inhale (was darker blue)
             BreathPhase.EXHALE -> "#00A066".toColorInt() // Darker green
             BreathPhase.HOLD2 -> "#007A4D".toColorInt() // Even darker green
-            else -> "#2C5984".toColorInt() // Default darker blue
+            else -> "#00D4FF".toColorInt() // Default darker blue
         }
     }
 
