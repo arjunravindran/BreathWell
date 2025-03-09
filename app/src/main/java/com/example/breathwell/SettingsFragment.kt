@@ -129,8 +129,8 @@ class SettingsFragment : Fragment() {
                 reminderHelper.cancelReminder()
             }
 
-            // Close settings and return to main screen
-            requireActivity().supportFragmentManager.popBackStack()
+            // Return to main screen (using the MainActivity method to ensure proper navigation stack)
+            (requireActivity() as MainActivity).hideAllFragments()
         }
     }
 

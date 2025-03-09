@@ -60,7 +60,7 @@ class ReminderSettingsFragment : Fragment() {
                 reminderHelper.cancelReminder()
             }
 
-            // Go back
+            // Navigate back properly with respect to fragment stack
             requireActivity().supportFragmentManager.popBackStack()
         }
     }

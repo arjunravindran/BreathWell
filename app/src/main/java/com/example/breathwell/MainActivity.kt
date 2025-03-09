@@ -14,17 +14,13 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.example.breathwell.databinding.ActivityMainBinding
 import com.example.breathwell.notification.ReminderNotificationHelper
 import com.example.breathwell.ui.BreathingUIController
-import com.example.breathwell.utils.AccessibilityUtils
-import com.example.breathwell.utils.BatteryOptimizationUtils
 import com.example.breathwell.utils.SoundEffectHelper
 import com.example.breathwell.utils.VibrationHelper
 import com.example.breathwell.viewmodel.BreathingViewModel
 import com.example.breathwell.viewmodel.BreathingViewModelFactory
-import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -77,6 +73,17 @@ class MainActivity : AppCompatActivity() {
         //lifecycleScope.launch {
         //    BatteryOptimizationUtils.requestDisableBatteryOptimization(this@MainActivity)
         //}
+
+        // Restore fragment state if needed
+        if (savedInstanceState != null) {
+            activeFragment = savedInstanceState.getInt("activeFragment", NO_FRAGMENT)
+            updateUIForActiveFragment()
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("activeFragment", activeFragment)
     }
 
     private fun requestPermissions() {
@@ -156,7 +163,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupNavigationButtons() {
         binding.settingsButton.setOnClickListener {
             if (activeFragment == SETTINGS_FRAGMENT) {
-                hideSettingsFragment()
+                hideAllFragments()
             } else {
                 showSettingsFragment()
             }
@@ -164,7 +171,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.habitTrackerButton.setOnClickListener {
             if (activeFragment == HABIT_TRACKER_FRAGMENT) {
-                hideHabitTrackerFragment()
+                hideAllFragments()
             } else {
                 showHabitTrackerFragment()
             }
@@ -175,15 +182,23 @@ class MainActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 when (activeFragment) {
-                    SETTINGS_FRAGMENT -> {
-                        hideSettingsFragment()
-                    }
-                    HABIT_TRACKER_FRAGMENT -> {
-                        hideHabitTrackerFragment()
+                    SETTINGS_FRAGMENT, HABIT_TRACKER_FRAGMENT -> {
+                        hideAllFragments()
                     }
                     REMINDER_SETTINGS_FRAGMENT -> {
                         supportFragmentManager.popBackStack()
-                        activeFragment = NO_FRAGMENT
+                        // Check what the current top fragment is
+                        activeFragment = if (supportFragmentManager.backStackEntryCount > 0) {
+                            val lastEntry = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 1)
+                            when (lastEntry.name) {
+                                "settings" -> SETTINGS_FRAGMENT
+                                "habit_tracker" -> HABIT_TRACKER_FRAGMENT
+                                else -> NO_FRAGMENT
+                            }
+                        } else {
+                            NO_FRAGMENT
+                        }
+                        updateUIForActiveFragment()
                     }
                     else -> {
                         isEnabled = false
@@ -224,6 +239,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         breathingUIController.refreshUIState()
+        updateUIForActiveFragment()
     }
 
     override fun onDestroy() {
@@ -239,15 +255,19 @@ class MainActivity : AppCompatActivity() {
             viewModel.toggleBreathing() // Stop the session first
         }
 
+        // Clear backstack and hide any existing fragments
+        clearBackStackAndFragments()
+
         hideBreathingContent()
 
         val settingsFragment = SettingsFragment()
         supportFragmentManager.beginTransaction()
             .replace(R.id.contentContainer, settingsFragment)
-            .addToBackStack(null)
+            .addToBackStack("settings")
             .commit()
 
         binding.settingsIcon.setImageResource(R.drawable.ic_close)
+        binding.habitTrackerIcon.setImageResource(R.drawable.ic_calendar)
         activeFragment = SETTINGS_FRAGMENT
     }
 
@@ -255,6 +275,7 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.popBackStack()
         showBreathingContent()
         binding.settingsIcon.setImageResource(R.drawable.ic_settings)
+        binding.habitTrackerIcon.setImageResource(R.drawable.ic_calendar)
         activeFragment = NO_FRAGMENT
     }
 
@@ -263,15 +284,19 @@ class MainActivity : AppCompatActivity() {
             viewModel.toggleBreathing() // Stop the session first
         }
 
+        // Clear backstack and hide any existing fragments
+        clearBackStackAndFragments()
+
         hideBreathingContent()
 
         val habitTrackerFragment = HabitTrackerFragment()
         supportFragmentManager.beginTransaction()
             .replace(R.id.contentContainer, habitTrackerFragment)
-            .addToBackStack(null)
+            .addToBackStack("habit_tracker")
             .commit()
 
         binding.habitTrackerIcon.setImageResource(R.drawable.ic_close)
+        binding.settingsIcon.setImageResource(R.drawable.ic_settings)
         activeFragment = HABIT_TRACKER_FRAGMENT
     }
 
@@ -279,6 +304,7 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.popBackStack()
         showBreathingContent()
         binding.habitTrackerIcon.setImageResource(R.drawable.ic_calendar)
+        binding.settingsIcon.setImageResource(R.drawable.ic_settings)
         activeFragment = NO_FRAGMENT
     }
 
@@ -292,7 +318,7 @@ class MainActivity : AppCompatActivity() {
         val reminderSettingsFragment = ReminderSettingsFragment()
         supportFragmentManager.beginTransaction()
             .replace(R.id.contentContainer, reminderSettingsFragment)
-            .addToBackStack(null)
+            .addToBackStack("reminder_settings")
             .commit()
 
         activeFragment = REMINDER_SETTINGS_FRAGMENT
@@ -316,6 +342,50 @@ class MainActivity : AppCompatActivity() {
             binding.breathingContentLand.root.visibility = View.VISIBLE
         } else {
             binding.breathingContent.root.visibility = View.VISIBLE
+        }
+    }
+
+    fun hideAllFragments() {
+        clearBackStackAndFragments()
+        showBreathingContent()
+        binding.settingsIcon.setImageResource(R.drawable.ic_settings)
+        binding.habitTrackerIcon.setImageResource(R.drawable.ic_calendar)
+        activeFragment = NO_FRAGMENT
+    }
+
+    fun clearBackStackAndFragments() {
+        // Clear the entire back stack
+        supportFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
+
+        // Find and remove any fragments still in the container
+        val currentFragment = supportFragmentManager.findFragmentById(R.id.contentContainer)
+        if (currentFragment != null) {
+            supportFragmentManager.beginTransaction()
+                .remove(currentFragment)
+                .commit()
+        }
+    }
+
+    fun updateUIForActiveFragment() {
+        when (activeFragment) {
+            NO_FRAGMENT -> {
+                showBreathingContent()
+                binding.settingsIcon.setImageResource(R.drawable.ic_settings)
+                binding.habitTrackerIcon.setImageResource(R.drawable.ic_calendar)
+            }
+            SETTINGS_FRAGMENT -> {
+                hideBreathingContent()
+                binding.settingsIcon.setImageResource(R.drawable.ic_close)
+                binding.habitTrackerIcon.setImageResource(R.drawable.ic_calendar)
+            }
+            HABIT_TRACKER_FRAGMENT -> {
+                hideBreathingContent()
+                binding.settingsIcon.setImageResource(R.drawable.ic_settings)
+                binding.habitTrackerIcon.setImageResource(R.drawable.ic_close)
+            }
+            REMINDER_SETTINGS_FRAGMENT -> {
+                hideBreathingContent()
+            }
         }
     }
 }
