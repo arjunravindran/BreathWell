@@ -36,6 +36,7 @@ class SettingsFragment : Fragment() {
 
         setupBreathingSettings()
         setupFeedbackSettings()
+        setupMusicSettings()
         setupReminderSettings()
         setupApplyButton()
     }
@@ -43,6 +44,7 @@ class SettingsFragment : Fragment() {
     private fun setupBreathingSettings() {
         val customPattern = viewModel.customPattern.value ?: return
 
+        // Set current custom values in input fields
         binding.inhaleInput.setText(customPattern.inhale.toString())
         binding.hold1Input.setText(customPattern.hold1.toString())
         binding.exhaleInput.setText(customPattern.exhale.toString())
@@ -55,11 +57,11 @@ class SettingsFragment : Fragment() {
         binding.vibrationSwitch.isChecked = viewModel.vibrationEnabled.value ?: true
 
         // Setup switch change listeners
-        binding.soundSwitch.setOnCheckedChangeListener { _, isChecked ->
+        binding.soundSwitch.setOnCheckedChangeListener { _, _ ->
             viewModel.toggleSound()
         }
 
-        binding.vibrationSwitch.setOnCheckedChangeListener { _, isChecked ->
+        binding.vibrationSwitch.setOnCheckedChangeListener { _, _ ->
             viewModel.toggleVibration()
         }
 
@@ -73,6 +75,42 @@ class SettingsFragment : Fragment() {
         viewModel.vibrationEnabled.observe(viewLifecycleOwner) { enabled ->
             if (binding.vibrationSwitch.isChecked != enabled) {
                 binding.vibrationSwitch.isChecked = enabled
+            }
+        }
+    }
+
+    private fun setupMusicSettings() {
+        // Set initial states from ViewModel
+        binding.musicSwitch.isChecked = viewModel.musicEnabled.value ?: true
+        binding.volumeSlider.value = viewModel.musicVolume.value ?: 0.3f
+
+        // Show/hide volume slider based on initial music enabled state
+        binding.volumeSettingsLayout.visibility = if (viewModel.musicEnabled.value == true) View.VISIBLE else View.GONE
+
+        // Setup music switch listener
+        binding.musicSwitch.setOnCheckedChangeListener { _, _ ->
+            viewModel.toggleMusic()
+        }
+
+        // Setup volume slider listener
+        binding.volumeSlider.addOnChangeListener { _, value, fromUser ->
+            if (fromUser) {
+                viewModel.setMusicVolume(value)
+            }
+        }
+
+        // Observe changes from ViewModel
+        viewModel.musicEnabled.observe(viewLifecycleOwner) { enabled ->
+            if (binding.musicSwitch.isChecked != enabled) {
+                binding.musicSwitch.isChecked = enabled
+            }
+            // Show/hide volume slider based on music enabled state
+            binding.volumeSettingsLayout.visibility = if (enabled) View.VISIBLE else View.GONE
+        }
+
+        viewModel.musicVolume.observe(viewLifecycleOwner) { volume ->
+            if (binding.volumeSlider.value != volume) {
+                binding.volumeSlider.value = volume
             }
         }
     }
@@ -100,18 +138,22 @@ class SettingsFragment : Fragment() {
 
     private fun setupApplyButton() {
         binding.applyButton.setOnClickListener {
-            // Apply breathing pattern settings
+            // Get values from input fields
             val inhaleText = binding.inhaleInput.text.toString()
             val hold1Text = binding.hold1Input.text.toString()
             val exhaleText = binding.exhaleInput.text.toString()
             val hold2Text = binding.hold2Input.text.toString()
 
+            // Parse values with default fallbacks if inputs are invalid
             val inhale = inhaleText.toIntOrNull() ?: 4
             val hold1 = hold1Text.toIntOrNull() ?: 4
             val exhale = exhaleText.toIntOrNull() ?: 4
             val hold2 = hold2Text.toIntOrNull() ?: 2
 
+            // First update the custom pattern with the new values
             viewModel.updateCustomPattern(inhale, hold1, exhale, hold2)
+
+            // Then set it as the active pattern
             viewModel.setActivePattern(viewModel.customPattern.value!!)
 
             // Apply reminder settings
@@ -129,7 +171,7 @@ class SettingsFragment : Fragment() {
                 reminderHelper.cancelReminder()
             }
 
-            // Return to main screen (using the MainActivity method to ensure proper navigation stack)
+            // Return to main screen
             (requireActivity() as MainActivity).hideAllFragments()
         }
     }

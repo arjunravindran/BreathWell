@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.breathwell.databinding.ActivityMainBinding
 import com.example.breathwell.notification.ReminderNotificationHelper
 import com.example.breathwell.ui.BreathingUIController
+import com.example.breathwell.utils.BackgroundMusicHelper
 import com.example.breathwell.utils.SoundEffectHelper
 import com.example.breathwell.utils.VibrationHelper
 import com.example.breathwell.viewmodel.BreathingViewModel
@@ -29,6 +30,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var breathingUIController: BreathingUIController
     private lateinit var soundEffectHelper: SoundEffectHelper
     private lateinit var vibrationHelper: VibrationHelper
+    private lateinit var backgroundMusicHelper: BackgroundMusicHelper
 
     companion object {
         private const val PERMISSION_REQUEST_CODE = 1001
@@ -69,10 +71,19 @@ class MainActivity : AppCompatActivity() {
         // Initialize reminders if enabled
         initializeReminders()
 
-        // Check battery optimization
-        //lifecycleScope.launch {
-        //    BatteryOptimizationUtils.requestDisableBatteryOptimization(this@MainActivity)
-        //}
+        // Initialize background music
+        backgroundMusicHelper = BackgroundMusicHelper(this)
+        lifecycle.addObserver(backgroundMusicHelper)
+        backgroundMusicHelper.initialize(R.raw.background_music)
+
+        // Set up observers for music settings
+        viewModel.musicEnabled.observe(this) { enabled ->
+            backgroundMusicHelper.setMusicEnabled(enabled)
+        }
+
+        viewModel.musicVolume.observe(this) { volume ->
+            backgroundMusicHelper.setVolume(volume)
+        }
 
         // Restore fragment state if needed
         if (savedInstanceState != null) {
@@ -152,9 +163,6 @@ class MainActivity : AppCompatActivity() {
                 soundEffectHelper.playPhaseTransitionSound(it)
             }
         }
-
-        // Setup power saving mode
-        //viewModel.setPowerSavingMode(BatteryOptimizationUtils.adaptToPowerSaving(this))
 
         // Setup navigation buttons
         setupNavigationButtons()
@@ -244,8 +252,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        lifecycle.removeObserver(backgroundMusicHelper)
         if (::soundEffectHelper.isInitialized) {
             soundEffectHelper.release()
+        }
+        if (::backgroundMusicHelper.isInitialized) {
+            backgroundMusicHelper.release()
         }
     }
 
@@ -345,6 +357,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // This method is public so it can be called from fragments
     fun hideAllFragments() {
         clearBackStackAndFragments()
         showBreathingContent()
@@ -353,7 +366,7 @@ class MainActivity : AppCompatActivity() {
         activeFragment = NO_FRAGMENT
     }
 
-    fun clearBackStackAndFragments() {
+    private fun clearBackStackAndFragments() {
         // Clear the entire back stack
         supportFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
 
@@ -366,7 +379,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun updateUIForActiveFragment() {
+    private fun updateUIForActiveFragment() {
         when (activeFragment) {
             NO_FRAGMENT -> {
                 showBreathingContent()

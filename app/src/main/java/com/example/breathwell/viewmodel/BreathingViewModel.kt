@@ -31,6 +31,12 @@ class BreathingViewModel(
         const val KEY_PHASE = "breath_phase"
         const val KEY_VIBRATION_ENABLED = "vibration_enabled"
         const val KEY_SOUND_ENABLED = "sound_enabled"
+        const val KEY_CUSTOM_INHALE = "custom_inhale"
+        const val KEY_CUSTOM_HOLD1 = "custom_hold1"
+        const val KEY_CUSTOM_EXHALE = "custom_exhale"
+        const val KEY_CUSTOM_HOLD2 = "custom_hold2"
+        const val KEY_MUSIC_ENABLED = "music_enabled"
+        const val KEY_MUSIC_VOLUME = "music_volume"
     }
 
     // LiveData to observe in the UI
@@ -58,7 +64,16 @@ class BreathingViewModel(
     )
     val currentCycle: LiveData<Int> = _currentCycle
 
-    private val _customPattern = MutableLiveData<BreathingPattern>(BreathingPattern.CUSTOM)
+    // Initialize custom pattern from saved state or default values
+    private val _customPattern = MutableLiveData(
+        BreathingPattern(
+            "Custom",
+            savedStateHandle.get(KEY_CUSTOM_INHALE) ?: 4,
+            savedStateHandle.get(KEY_CUSTOM_HOLD1) ?: 4,
+            savedStateHandle.get(KEY_CUSTOM_EXHALE) ?: 4,
+            savedStateHandle.get(KEY_CUSTOM_HOLD2) ?: 2
+        )
+    )
     val customPattern: LiveData<BreathingPattern> = _customPattern
 
     // Expansion percentage for circle animation (0-100)
@@ -69,7 +84,6 @@ class BreathingViewModel(
 
     // Power saving mode
     private val _powerSavingMode = MutableLiveData<PowerSavingMode>(PowerSavingMode.NONE)
-    val powerSavingMode: LiveData<PowerSavingMode> = _powerSavingMode
 
     // Haptic feedback settings
     private val _vibrationEnabled = MutableLiveData<Boolean>(
@@ -82,6 +96,17 @@ class BreathingViewModel(
         savedStateHandle.get(KEY_SOUND_ENABLED) ?: true
     )
     val soundEnabled: LiveData<Boolean> = _soundEnabled
+
+    // Background music settings
+    private val _musicEnabled = MutableLiveData<Boolean>(
+        savedStateHandle.get(KEY_MUSIC_ENABLED) ?: true
+    )
+    val musicEnabled: LiveData<Boolean> = _musicEnabled
+
+    private val _musicVolume = MutableLiveData<Float>(
+        savedStateHandle.get(KEY_MUSIC_VOLUME) ?: 0.3f
+    )
+    val musicVolume: LiveData<Float> = _musicVolume
 
     // Phase transition event - used to notify for sound/vibration
     val phaseTransitionEvent = MutableLiveData<BreathPhase?>()
@@ -171,14 +196,6 @@ class BreathingViewModel(
         phaseTransitionEvent.value = null
     }
 
-    // Set power saving mode
-    fun setPowerSavingMode(mode: PowerSavingMode) {
-        if (_powerSavingMode.value != mode) {
-            _powerSavingMode.value = mode
-            countdownController.setPowerSavingMode(mode)
-        }
-    }
-
     // Start/stop the breathing exercise
     fun toggleBreathing() {
         if (_isRunning.value == true) {
@@ -198,6 +215,19 @@ class BreathingViewModel(
     fun toggleSound() {
         _soundEnabled.value = _soundEnabled.value != true
         savedStateHandle.set(KEY_SOUND_ENABLED, _soundEnabled.value)
+    }
+
+    // Toggle background music on/off
+    fun toggleMusic() {
+        _musicEnabled.value = _musicEnabled.value != true
+        savedStateHandle.set(KEY_MUSIC_ENABLED, _musicEnabled.value)
+    }
+
+    // Set background music volume
+    fun setMusicVolume(volume: Float) {
+        val clampedVolume = volume.coerceIn(0f, 1f)
+        _musicVolume.value = clampedVolume
+        savedStateHandle.set(KEY_MUSIC_VOLUME, clampedVolume)
     }
 
     private fun startBreathing() {
@@ -347,7 +377,7 @@ class BreathingViewModel(
     private fun startInhalePhase() {
         val inhaleDuration = _activePattern.value?.inhale ?: 4
         countdownController.startCountdown(inhaleDuration)
-        animateCircle(30f, 95f, _activePattern.value?.inhale?.times(1000L) ?: 4000L)
+        animateCircle(30f, 95f, inhaleDuration * 1000L)
     }
 
     private fun startHold1Phase() {
@@ -361,7 +391,7 @@ class BreathingViewModel(
     private fun startExhalePhase() {
         val exhaleDuration = _activePattern.value?.exhale ?: 4
         countdownController.startCountdown(exhaleDuration)
-        animateCircle(95f, 30f, _activePattern.value?.exhale?.times(1000L) ?: 4000L)
+        animateCircle(95f, 30f, exhaleDuration * 1000L)
     }
 
     private fun startHold2Phase() {
@@ -424,6 +454,12 @@ class BreathingViewModel(
             hold2.coerceIn(0, 10)
         )
         _customPattern.value = updated
+
+        // Save the custom pattern values to savedStateHandle
+        savedStateHandle.set(KEY_CUSTOM_INHALE, inhale.coerceIn(1, 10))
+        savedStateHandle.set(KEY_CUSTOM_HOLD1, hold1.coerceIn(0, 10))
+        savedStateHandle.set(KEY_CUSTOM_EXHALE, exhale.coerceIn(1, 10))
+        savedStateHandle.set(KEY_CUSTOM_HOLD2, hold2.coerceIn(0, 10))
 
         // If custom pattern is currently selected, update the active pattern too
         if (_activePattern.value?.name == "Custom") {

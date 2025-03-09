@@ -42,6 +42,11 @@
     <string name="sound_settings">Sound Settings</string>
     <string name="vibration_settings">Vibration Settings</string>
 
+    <string name="enable_background_music">Enable Background Music</string>
+    <string name="music_volume">Music Volume</string>
+    <string name="music_volume_slider">Adjust music volume</string>
+    <string name="music_settings">Music Settings</string>
+
 
     <!-- Accessibility strings -->
     <string name="accessibility_inhale_announcement">Inhale for %d seconds</string>
