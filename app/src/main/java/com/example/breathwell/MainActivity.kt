@@ -129,7 +129,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initializeComponents() {
         // Initialize feedback helpers
-        soundEffectHelper = SoundEffectHelper()
+        soundEffectHelper = SoundEffectHelper(this)
         vibrationHelper = VibrationHelper(this)
 
         // Create UI controller

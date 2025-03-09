@@ -182,8 +182,13 @@ class HALCircleView @JvmOverloads constructor(
 
         // Calculate circle dimensions
         val minDimension = min(width, height)
-        val baseRadius = minDimension * 0.3f
-        val outerRadius = baseRadius * (1.0f + (expansion - 50f) / 120f)
+        // Adjust base radius to be smaller (75% of original)
+        val baseRadius = minDimension * 0.25f
+
+        // More conservative expansion range to prevent overflow
+        // Map expansion from 0-100 to a smaller range
+        val expansionFactor = (expansion - 50f) / 150f // Less dramatic expansion
+        val outerRadius = baseRadius * (1.0f + expansionFactor.coerceIn(-0.3f, 0.3f))
         val innerRadius = outerRadius * 0.6f
 
         // Apply pulse animation

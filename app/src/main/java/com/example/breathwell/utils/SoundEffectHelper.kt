@@ -1,25 +1,33 @@
 package com.example.breathwell.utils
 
+import android.content.Context
 import android.media.AudioManager
+import android.media.MediaPlayer
 import android.media.ToneGenerator
 import android.util.Log
+import com.example.breathwell.R
 import com.example.breathwell.model.BreathPhase
 
 /**
  * Helper class for playing sound effects during breathing exercises
- * Uses Android's built-in system tones
+ * Uses both Android's built-in system tones and custom sound files
  */
-class SoundEffectHelper {
+class SoundEffectHelper(private val context: Context) {
 
     // ToneGenerator for system sounds
     private var toneGenerator: ToneGenerator? = null
+
+    // MediaPlayer for custom sounds
+    private var phaseTransitionPlayer: MediaPlayer? = null
+    private var sessionCompletePlayer: MediaPlayer? = null
 
     // Sound enabled flag
     private var soundEnabled = true
 
     init {
-        // Initialize tone generator
+        // Initialize tone generator and media players
         setupToneGenerator()
+        setupMediaPlayers()
     }
 
     /**
@@ -36,6 +44,35 @@ class SoundEffectHelper {
     }
 
     /**
+     * Set up media players for custom sounds
+     */
+    private fun setupMediaPlayers() {
+        try {
+            // Phase transition sound
+            phaseTransitionPlayer = MediaPlayer.create(context, R.raw.phase_transition)
+            phaseTransitionPlayer?.setVolume(0.7f, 0.7f)
+            phaseTransitionPlayer?.setOnCompletionListener {
+                it.reset()
+                it.setDataSource(context.resources.openRawResourceFd(R.raw.phase_transition))
+                it.prepare()
+            }
+
+            // Session complete sound
+            sessionCompletePlayer = MediaPlayer.create(context, R.raw.session_complete)
+            sessionCompletePlayer?.setVolume(0.7f, 0.7f)
+            sessionCompletePlayer?.setOnCompletionListener {
+                it.reset()
+                it.setDataSource(context.resources.openRawResourceFd(R.raw.session_complete))
+                it.prepare()
+            }
+
+            Log.d("SoundEffectHelper", "Media players initialized successfully")
+        } catch (e: Exception) {
+            Log.e("SoundEffectHelper", "Failed to create media players: ${e.message}")
+        }
+    }
+
+    /**
      * Play sound for phase transition
      * @param phase Current breathing phase
      */
@@ -44,31 +81,30 @@ class SoundEffectHelper {
 
         try {
             when (phase) {
-                BreathPhase.INHALE -> {
-                    // Gentle sound for inhale
-                    toneGenerator?.startTone(ToneGenerator.TONE_PROP_BEEP, 100)
-                }
-                BreathPhase.EXHALE -> {
-                    // Different sound for exhale
-                    toneGenerator?.startTone(ToneGenerator.TONE_PROP_BEEP2, 100)
-                }
-                BreathPhase.HOLD1, BreathPhase.HOLD2 -> {
-                    // Subtle sound for hold phases
-                    toneGenerator?.startTone(ToneGenerator.TONE_PROP_ACK, 80)
+                BreathPhase.INHALE, BreathPhase.EXHALE, BreathPhase.HOLD1, BreathPhase.HOLD2 -> {
+                    // Play the phase transition sound for all breathing phases
+                    if (phaseTransitionPlayer?.isPlaying == true) {
+                        phaseTransitionPlayer?.stop()
+                        phaseTransitionPlayer?.reset()
+                        phaseTransitionPlayer?.setDataSource(context.resources.openRawResourceFd(R.raw.phase_transition))
+                        phaseTransitionPlayer?.prepare()
+                    }
+                    phaseTransitionPlayer?.start()
                 }
                 BreathPhase.COMPLETE -> {
-                    // More noticeable completion sound
-                    toneGenerator?.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 300)
+                    // Play completion sound
+                    sessionCompletePlayer?.start()
                 }
                 else -> {
                     // No sound for READY phase
                 }
             }
         } catch (e: Exception) {
-            Log.e("SoundEffectHelper", "Error playing tone: ${e.message}")
+            Log.e("SoundEffectHelper", "Error playing sound: ${e.message}")
 
-            // If tone generator failed, try to recreate it
+            // If sound playback failed, try to recreate resources
             setupToneGenerator()
+            setupMediaPlayers()
         }
     }
 
@@ -86,8 +122,14 @@ class SoundEffectHelper {
         try {
             toneGenerator?.release()
             toneGenerator = null
+
+            phaseTransitionPlayer?.release()
+            phaseTransitionPlayer = null
+
+            sessionCompletePlayer?.release()
+            sessionCompletePlayer = null
         } catch (e: Exception) {
-            Log.e("SoundEffectHelper", "Error releasing ToneGenerator: ${e.message}")
+            Log.e("SoundEffectHelper", "Error releasing resources: ${e.message}")
         }
     }
 }
