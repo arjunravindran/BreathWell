@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "854967735868",
+    "project_id": "breathwell-c0283",
+    "storage_bucket": "breathwell-c0283.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:854967735868:android:6f0fff9c313020f8c19539",
+        "android_client_info": {
+          "package_name": "com.example.breathwell"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4gnfgnQQkBZXw_HchjFtbhRunbGLzaOY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
