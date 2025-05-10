@@ -44,27 +44,27 @@ class BreathingViewModel(
     }
 
     // LiveData to observe in the UI
-    private val _activePattern = MutableLiveData<BreathingPattern>(BreathingPattern.BOX_BREATHING)
+    private val _activePattern = MutableLiveData(BreathingPattern.BOX_BREATHING)
     val activePattern: LiveData<BreathingPattern> = _activePattern
 
-    private val _breathPhase = MutableLiveData<BreathPhase>(
-        savedStateHandle.get(KEY_PHASE) ?: BreathPhase.READY
+    private val _breathPhase: MutableLiveData<BreathPhase> = MutableLiveData(
+        savedStateHandle[KEY_PHASE] ?: BreathPhase.READY
     )
     val breathPhase: LiveData<BreathPhase> = _breathPhase
 
-    private val _counter = MutableLiveData<Int>(0)
+    private val _counter = MutableLiveData(0)
     val counter: LiveData<Int> = _counter
 
-    private val _isRunning = MutableLiveData<Boolean>(
-        savedStateHandle.get(KEY_IS_RUNNING) ?: false
+    private val _isRunning = MutableLiveData(
+        savedStateHandle[KEY_IS_RUNNING] ?: false
     )
     val isRunning: LiveData<Boolean> = _isRunning
 
-    private val _totalCycles = MutableLiveData<Int>(5)
+    private val _totalCycles = MutableLiveData(5)
     val totalCycles: LiveData<Int> = _totalCycles
 
-    private val _currentCycle = MutableLiveData<Int>(
-        savedStateHandle.get(KEY_CURRENT_CYCLE) ?: 0
+    private val _currentCycle = MutableLiveData(
+        savedStateHandle[KEY_CURRENT_CYCLE] ?: 0
     )
     val currentCycle: LiveData<Int> = _currentCycle
 
@@ -72,51 +72,51 @@ class BreathingViewModel(
     private val _customPattern = MutableLiveData(
         BreathingPattern(
             "Custom",
-            savedStateHandle.get(KEY_CUSTOM_INHALE) ?: 4,
-            savedStateHandle.get(KEY_CUSTOM_HOLD1) ?: 4,
-            savedStateHandle.get(KEY_CUSTOM_EXHALE) ?: 4,
-            savedStateHandle.get(KEY_CUSTOM_HOLD2) ?: 2
+            savedStateHandle[KEY_CUSTOM_INHALE] ?: 4,
+            savedStateHandle[KEY_CUSTOM_HOLD1] ?: 4,
+            savedStateHandle[KEY_CUSTOM_EXHALE] ?: 4,
+            savedStateHandle[KEY_CUSTOM_HOLD2] ?: 2
         )
     )
-    val customPattern: LiveData<BreathingPattern> = _customPattern
+    val customPattern = _customPattern
 
     // Expansion percentage for circle animation (0-100)
-    private val _circleExpansion = MutableLiveData<Float>(
-        savedStateHandle.get(KEY_EXPANSION) ?: 50f
+    private val _circleExpansion = MutableLiveData(
+        savedStateHandle[KEY_EXPANSION] ?: 50f
     )
-    val circleExpansion: LiveData<Float> = _circleExpansion
+    val circleExpansion = _circleExpansion
 
     // Power saving mode
-    private val _powerSavingMode = MutableLiveData<PowerSavingMode>(PowerSavingMode.NONE)
+    private val _powerSavingMode = MutableLiveData(PowerSavingMode.NONE)
 
     // Haptic feedback settings
-    private val _vibrationEnabled = MutableLiveData<Boolean>(
-        savedStateHandle.get(KEY_VIBRATION_ENABLED) ?: true
+    private val _vibrationEnabled = MutableLiveData(
+        savedStateHandle[KEY_VIBRATION_ENABLED] ?: true
     )
     val vibrationEnabled: LiveData<Boolean> = _vibrationEnabled
 
     // Sound feedback settings
-    private val _soundEnabled = MutableLiveData<Boolean>(
-        savedStateHandle.get(KEY_SOUND_ENABLED) ?: true
+    private val _soundEnabled = MutableLiveData(
+        this.savedStateHandle[KEY_SOUND_ENABLED] ?: true
     )
-    val soundEnabled: LiveData<Boolean> = _soundEnabled
+    val soundEnabled = _soundEnabled
 
     // Background music settings
-    private val _musicEnabled = MutableLiveData<Boolean>(
-        savedStateHandle.get(KEY_MUSIC_ENABLED) ?: true
+    private val _musicEnabled = MutableLiveData(
+        savedStateHandle[KEY_MUSIC_ENABLED] ?: true
     )
-    val musicEnabled: LiveData<Boolean> = _musicEnabled
+    val musicEnabled = _musicEnabled
 
-    private val _musicVolume = MutableLiveData<Float>(
-        savedStateHandle.get(KEY_MUSIC_VOLUME) ?: 0.3f
+    private val _musicVolume = MutableLiveData(
+        savedStateHandle[KEY_MUSIC_VOLUME] ?: 0.3f
     )
-    val musicVolume: LiveData<Float> = _musicVolume
+    val musicVolume = _musicVolume
 
     // Phase transition event - used to notify for sound/vibration
     val phaseTransitionEvent = MutableLiveData<BreathPhase?>()
 
     // New properties for habit tracking
-    private val _sessionCompleted = MutableLiveData<Boolean>(false)
+    private val _sessionCompleted = MutableLiveData(false)
 
     val completedDates: LiveData<List<LocalDate>> = repository.getAllCompletedDates()
 
@@ -148,31 +148,31 @@ class BreathingViewModel(
     /**
      * Save animation state for restoration after config changes
      */
-    fun saveAnimationState(expansion: Float) {
-        savedStateHandle.set(KEY_EXPANSION, expansion)
-        savedStateHandle.set(KEY_CURRENT_CYCLE, _currentCycle.value)
-        savedStateHandle.set(KEY_IS_RUNNING, _isRunning.value)
-        savedStateHandle.set(KEY_PHASE, _breathPhase.value)
-        savedStateHandle.set(KEY_VIBRATION_ENABLED, _vibrationEnabled.value)
-        savedStateHandle.set(KEY_SOUND_ENABLED, _soundEnabled.value)
+    private fun saveAnimationState(expansion: Float) {
+        savedStateHandle[KEY_EXPANSION] = expansion
+        savedStateHandle[KEY_CURRENT_CYCLE] = _currentCycle.value
+        savedStateHandle[KEY_IS_RUNNING] = _isRunning.value
+        savedStateHandle[KEY_PHASE] = _breathPhase.value
+        savedStateHandle[KEY_VIBRATION_ENABLED] = _vibrationEnabled.value
+        savedStateHandle[KEY_SOUND_ENABLED] = _soundEnabled.value
     }
 
     /**
      * Reset breathing phase to READY state
      */
-    fun resetBreathingPhase() {
+    private fun resetBreathingPhase() {
         _breathPhase.value = BreathPhase.READY
-        savedStateHandle.set(KEY_PHASE, BreathPhase.READY)
+        savedStateHandle[KEY_PHASE] = BreathPhase.READY
         _circleExpansion.value = 50f  // Reset circle to neutral position
-        savedStateHandle.set(KEY_EXPANSION, 50f)
+        savedStateHandle[KEY_EXPANSION] = 50f
     }
 
     /**
      * Reset current cycle count to zero
      */
-    fun resetCurrentCycle() {
+    private fun resetCurrentCycle() {
         _currentCycle.value = 0
-        savedStateHandle.set(KEY_CURRENT_CYCLE, 0)
+        savedStateHandle[KEY_CURRENT_CYCLE] = 0
         _sessionCompleted.value = false
     }
 
@@ -187,11 +187,11 @@ class BreathingViewModel(
 
         // Reset state
         _isRunning.value = false
-        savedStateHandle.set(KEY_IS_RUNNING, false)
+        this.savedStateHandle[KEY_IS_RUNNING] = false
         resetBreathingPhase()
         resetCurrentCycle()
         _circleExpansion.value = 50f
-        savedStateHandle.set(KEY_EXPANSION, 50f)
+        savedStateHandle[KEY_EXPANSION] = 50f
         _counter.value = 0
 
         // Trigger event for reset feedback
@@ -211,38 +211,38 @@ class BreathingViewModel(
     // Toggle vibration feedback
     fun toggleVibration() {
         _vibrationEnabled.value = _vibrationEnabled.value != true
-        savedStateHandle.set(KEY_VIBRATION_ENABLED, _vibrationEnabled.value)
+        savedStateHandle[KEY_VIBRATION_ENABLED] = _vibrationEnabled.value
     }
 
     // Toggle sound feedback
     fun toggleSound() {
         _soundEnabled.value = _soundEnabled.value != true
-        savedStateHandle.set(KEY_SOUND_ENABLED, _soundEnabled.value)
+        savedStateHandle[KEY_SOUND_ENABLED] = this._soundEnabled.value
     }
 
     // Toggle background music on/off
     fun toggleMusic() {
         _musicEnabled.value = _musicEnabled.value != true
-        savedStateHandle.set(KEY_MUSIC_ENABLED, _musicEnabled.value)
+        savedStateHandle[KEY_MUSIC_ENABLED] = _musicEnabled.value
     }
 
     // Set background music volume
     fun setMusicVolume(volume: Float) {
         val clampedVolume = volume.coerceIn(0f, 1f)
         _musicVolume.value = clampedVolume
-        savedStateHandle.set(KEY_MUSIC_VOLUME, clampedVolume)
+        this.savedStateHandle[KEY_MUSIC_VOLUME] = clampedVolume
     }
 
     private fun startBreathing() {
         _isRunning.value = true
-        savedStateHandle.set(KEY_IS_RUNNING, true)
+        savedStateHandle[KEY_IS_RUNNING] = true
 
         // Only reset phase if not resuming from config change or if we're complete
         if (_breathPhase.value == BreathPhase.READY || _breathPhase.value == BreathPhase.COMPLETE) {
             _breathPhase.value = BreathPhase.READY
-            savedStateHandle.set(KEY_PHASE, BreathPhase.READY)
+            savedStateHandle[KEY_PHASE] = BreathPhase.READY
             _currentCycle.value = 0
-            savedStateHandle.set(KEY_CURRENT_CYCLE, 0)
+            this.savedStateHandle[KEY_CURRENT_CYCLE] = 0
             _sessionCompleted.value = false
         }
 
@@ -258,7 +258,7 @@ class BreathingViewModel(
         saveAnimationState(_circleExpansion.value ?: 50f)
 
         _isRunning.value = false
-        savedStateHandle.set(KEY_IS_RUNNING, false)
+        this.savedStateHandle[KEY_IS_RUNNING] = false
     }
 
     private fun completeSession() {
@@ -266,13 +266,13 @@ class BreathingViewModel(
         circleAnimator?.cancel()
         circleAnimator = null
         _isRunning.value = false
-        savedStateHandle.set(KEY_IS_RUNNING, false)
+        savedStateHandle[KEY_IS_RUNNING] = false
         _breathPhase.value = BreathPhase.COMPLETE
-        savedStateHandle.set(KEY_PHASE, BreathPhase.COMPLETE)
+        savedStateHandle[KEY_PHASE] = BreathPhase.COMPLETE
         _currentCycle.value = _totalCycles.value ?: 0
-        savedStateHandle.set(KEY_CURRENT_CYCLE, _currentCycle.value)
+        savedStateHandle[KEY_CURRENT_CYCLE] = _currentCycle.value
         _circleExpansion.value = 50f
-        savedStateHandle.set(KEY_EXPANSION, 50f)
+        savedStateHandle[KEY_EXPANSION] = 50f
 
         // Trigger phase transition event for completion sound/vibration
         phaseTransitionEvent.value = BreathPhase.COMPLETE
@@ -369,7 +369,7 @@ class BreathingViewModel(
         // Trigger phase transition event for sound/vibration
         nextPhase?.let {
             _breathPhase.value = it
-            savedStateHandle.set(KEY_PHASE, it)
+            this.savedStateHandle[KEY_PHASE] = it
             phaseTransitionEvent.value = it
             phaseTransitionEvent.value = null
         }
@@ -383,7 +383,7 @@ class BreathingViewModel(
             completeSession()
         } else {
             _currentCycle.value = currentCycleValue + 1
-            savedStateHandle.set(KEY_CURRENT_CYCLE, _currentCycle.value)
+            this.savedStateHandle[KEY_CURRENT_CYCLE] = _currentCycle.value
         }
     }
 
@@ -398,7 +398,7 @@ class BreathingViewModel(
         countdownController.startCountdown(holdDuration)
         // Keep expanded at 95%
         _circleExpansion.value = 95f
-        savedStateHandle.set(KEY_EXPANSION, 95f)
+        savedStateHandle[KEY_EXPANSION] = 95f
     }
 
     private fun startExhalePhase() {
@@ -412,7 +412,7 @@ class BreathingViewModel(
         countdownController.startCountdown(hold2Duration)
         // Keep contracted at 30%
         _circleExpansion.value = 30f
-        savedStateHandle.set(KEY_EXPANSION, 30f)
+        savedStateHandle[KEY_EXPANSION] = 30f
     }
 
     private fun animateCircle(from: Float, to: Float, duration: Long) {
@@ -436,7 +436,7 @@ class BreathingViewModel(
             this.duration = adjustedDuration.toLong()
             addUpdateListener { animation ->
                 _circleExpansion.value = animation.animatedValue as Float
-                savedStateHandle.set(KEY_EXPANSION, _circleExpansion.value)
+                savedStateHandle[KEY_EXPANSION] = _circleExpansion.value
             }
 
             // Use AccelerateDecelerateInterpolator for smoother start/stop
@@ -469,10 +469,10 @@ class BreathingViewModel(
         _customPattern.value = updated
 
         // Save the custom pattern values to savedStateHandle
-        savedStateHandle.set(KEY_CUSTOM_INHALE, inhale.coerceIn(1, 10))
-        savedStateHandle.set(KEY_CUSTOM_HOLD1, hold1.coerceIn(0, 10))
-        savedStateHandle.set(KEY_CUSTOM_EXHALE, exhale.coerceIn(1, 10))
-        savedStateHandle.set(KEY_CUSTOM_HOLD2, hold2.coerceIn(0, 10))
+        savedStateHandle[KEY_CUSTOM_INHALE] = inhale.coerceIn(1, 10)
+        savedStateHandle[KEY_CUSTOM_HOLD1] = hold1.coerceIn(0, 10)
+        savedStateHandle[KEY_CUSTOM_EXHALE] = exhale.coerceIn(1, 10)
+        savedStateHandle[KEY_CUSTOM_HOLD2] = hold2.coerceIn(0, 10)
 
         // If custom pattern is currently selected, update the active pattern too
         if (_activePattern.value?.name == "Custom") {

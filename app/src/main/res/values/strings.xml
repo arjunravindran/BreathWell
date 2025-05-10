@@ -7,7 +7,6 @@
     <string name="stop">STOP</string>
     <string name="reset">RESET</string>
     <string name="start_new_session">START NEW SESSION</string>
-    <string name="app_footer">AEROPOWER • MINDFUL BREATHING</string>
     <string name="inhale">INHALE</string>
     <string name="hold">HOLD</string>
     <string name="exhale">EXHALE</string>
@@ -24,8 +23,6 @@
     <string name="habit_tracker">Habit Tracker</string>
     <string name="current_streak">Current Streak</string>
     <string name="days">days</string>
-    <string name="this_week">This Week</string>
-    <string name="this_month">This Month</string>
     <string name="previous_month">Previous Month</string>
     <string name="next_month">Next Month</string>
 
@@ -39,13 +36,10 @@
     <string name="feedback_settings">Feedback Settings</string>
     <string name="enable_sound_effects">Enable Sound Effects</string>
     <string name="enable_vibration">Enable Vibration</string>
-    <string name="sound_settings">Sound Settings</string>
-    <string name="vibration_settings">Vibration Settings</string>
 
     <string name="enable_background_music">Enable Background Music</string>
     <string name="music_volume">Music Volume</string>
     <string name="music_volume_slider">Adjust music volume</string>
-    <string name="music_settings">Music Settings</string>
 
 
     <!-- Accessibility strings -->
@@ -56,16 +50,13 @@
     <string name="accessibility_complete_announcement">Breathing exercise complete</string>
     <string name="accessibility_open_settings">Open settings</string>
     <string name="accessibility_open_habit_tracker">Open habit tracker</string>
-    <string name="accessibility_open_reminders">Open reminders</string>
     <string name="accessibility_start_session">Start breathing session</string>
     <string name="accessibility_stop_session">Stop breathing session</string>
     <string name="accessibility_reset_session">Reset breathing session</string>
-    <string name="accessibility_start_new_session">Start new breathing session</string>
     <string name="accessibility_expand_dropdown">Expand dropdown</string>
     <string name="accessibility_cycles_slider">Adjust number of cycles</string>
 
     <string name="widget_default_message">Take a moment to breathe and stay mindful</string>
-    <string name="breathe_now">BREATHE NOW</string>
     <string name="_0">0</string>
 
 </resources>

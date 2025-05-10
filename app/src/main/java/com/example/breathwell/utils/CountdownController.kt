@@ -71,13 +71,6 @@ class CountdownController {
     }
 
     /**
-     * Set power saving mode
-     */
-    fun setPowerSavingMode(mode: PowerSavingMode) {
-        powerSavingMode = mode
-    }
-
-    /**
      * Clean up resources
      */
     fun cleanup() {

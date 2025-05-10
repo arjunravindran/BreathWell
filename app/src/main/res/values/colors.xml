@@ -3,7 +3,6 @@
     <color name="gray_950">#121212</color>
     <color name="gray_900">#181818</color>
     <color name="gray_800">#202020</color>
-    <color name="gray_700">#333333</color>
     <color name="gray_600">#666666</color>
     <color name="gray_500">#999999</color>
     <color name="white">#FFFFFF</color>
@@ -11,18 +10,7 @@
     <color name="cyan_400">#38E1FF</color>
     <color name="cyan_500">#00D4FF</color>
     <color name="cyan_gradient_start">#3D7DDFFF</color>
-    <color name="cyan_gradient_end">#3D00D4FF</color>
-
-    <color name="blue_light">#00A6ED</color>
-    <color name="blue_medium">#0080B3</color>
-    <color name="blue_dark">#0076AD</color>
-
-    <color name="green_light">#00D084</color>
-    <color name="green_medium">#00A66A</color>
-    <color name="green_dark">#007A4D</color>
 
     <color name="red_500">#FF5252</color>
 
-    <color name="blue_dark_tint">#0A1A30</color>
-    <color name="green_dark_tint">#0A2414</color>
 </resources>

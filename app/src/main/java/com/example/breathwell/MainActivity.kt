@@ -98,7 +98,7 @@ class MainActivity : AppCompatActivity() {
             // Make sure we're on main screen
             hideAllFragments()
 
-            // Use a slight delay to ensure UI is ready before starting
+            /* Use a slight delay to ensure UI is ready before starting */
             Handler(Looper.getMainLooper()).postDelayed({
                 // Start breathing session
                 viewModel.toggleBreathing()
@@ -276,7 +276,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Fragment management methods
-    fun showSettingsFragment() {
+    private fun showSettingsFragment() {
         if (viewModel.isRunning.value == true) {
             viewModel.toggleBreathing() // Stop the session first
         }
@@ -297,7 +297,7 @@ class MainActivity : AppCompatActivity() {
         activeFragment = SETTINGS_FRAGMENT
     }
 
-    fun showHabitTrackerFragment() {
+    private fun showHabitTrackerFragment() {
         if (viewModel.isRunning.value == true) {
             viewModel.toggleBreathing() // Stop the session first
         }
@@ -318,7 +318,7 @@ class MainActivity : AppCompatActivity() {
         activeFragment = HABIT_TRACKER_FRAGMENT
     }
 
-    fun updateScreenWakeState(keepAwake: Boolean) {
+    private fun updateScreenWakeState(keepAwake: Boolean) {
         if (keepAwake) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         } else {

@@ -62,7 +62,7 @@ class HabitTrackerFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        viewModel.completedDates.observe(viewLifecycleOwner) { dates ->
+        this.viewModel.completedDates.observe(viewLifecycleOwner) { _ ->
             // Update calendar with completed dates
             renderCalendar(currentYearMonth)
         }
