@@ -66,5 +66,6 @@
 
     <string name="widget_default_message">Take a moment to breathe and stay mindful</string>
     <string name="breathe_now">BREATHE NOW</string>
+    <string name="_0">0</string>
 
 </resources>

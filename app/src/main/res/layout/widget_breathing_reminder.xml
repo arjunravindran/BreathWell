@@ -31,7 +31,7 @@
             android:textColor="#FFFFFF"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:text="0" />
+            android:text="@string/_0" />
     </LinearLayout>
 
     <!-- Message - now anchored to the bottom of the widget -->

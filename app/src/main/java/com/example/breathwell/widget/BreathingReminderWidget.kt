@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
-import android.view.View
 import android.widget.RemoteViews
 import com.example.breathwell.MainActivity
 import com.example.breathwell.R

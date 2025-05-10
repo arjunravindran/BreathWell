@@ -297,14 +297,6 @@ class MainActivity : AppCompatActivity() {
         activeFragment = SETTINGS_FRAGMENT
     }
 
-    fun hideSettingsFragment() {
-        supportFragmentManager.popBackStack()
-        showBreathingContent()
-        binding.settingsIcon.setImageResource(R.drawable.ic_settings)
-        binding.habitTrackerIcon.setImageResource(R.drawable.ic_calendar)
-        activeFragment = NO_FRAGMENT
-    }
-
     fun showHabitTrackerFragment() {
         if (viewModel.isRunning.value == true) {
             viewModel.toggleBreathing() // Stop the session first
@@ -324,30 +316,6 @@ class MainActivity : AppCompatActivity() {
         binding.habitTrackerIcon.setImageResource(R.drawable.ic_close)
         binding.settingsIcon.setImageResource(R.drawable.ic_settings)
         activeFragment = HABIT_TRACKER_FRAGMENT
-    }
-
-    fun hideHabitTrackerFragment() {
-        supportFragmentManager.popBackStack()
-        showBreathingContent()
-        binding.habitTrackerIcon.setImageResource(R.drawable.ic_calendar)
-        binding.settingsIcon.setImageResource(R.drawable.ic_settings)
-        activeFragment = NO_FRAGMENT
-    }
-
-    fun showReminderSettingsFragment() {
-        if (viewModel.isRunning.value == true) {
-            viewModel.toggleBreathing() // Stop the session first
-        }
-
-        hideBreathingContent()
-
-        val reminderSettingsFragment = ReminderSettingsFragment()
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.contentContainer, reminderSettingsFragment)
-            .addToBackStack("reminder_settings")
-            .commit()
-
-        activeFragment = REMINDER_SETTINGS_FRAGMENT
     }
 
     fun updateScreenWakeState(keepAwake: Boolean) {

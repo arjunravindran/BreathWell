@@ -117,7 +117,6 @@ class BreathingViewModel(
 
     // New properties for habit tracking
     private val _sessionCompleted = MutableLiveData<Boolean>(false)
-    val sessionCompleted: LiveData<Boolean> = _sessionCompleted
 
     val completedDates: LiveData<List<LocalDate>> = repository.getAllCompletedDates()
 
@@ -502,10 +501,6 @@ class BreathingViewModel(
         }
     }
 
-    fun getCompletionCountForRange(startDate: LocalDate, endDate: LocalDate): LiveData<Int> {
-        return repository.getCompletionCountForRange(startDate, endDate)
-    }
-
     // Get HAL circle color based on current breath phase
     fun getBreathColor(): Int {
         return when (_breathPhase.value) {
@@ -525,30 +520,6 @@ class BreathingViewModel(
             BreathPhase.EXHALE -> "#00A066".toColorInt() // Darker green
             BreathPhase.HOLD2 -> "#007A4D".toColorInt() // Even darker green
             else -> "#00D4FF".toColorInt() // Default darker blue
-        }
-    }
-
-    // Get background gradient colors based on current phase
-    fun getBackgroundColors(): Pair<Int, Int> {
-        return when (_breathPhase.value) {
-            BreathPhase.INHALE, BreathPhase.HOLD1 -> {
-                Pair(
-                    "#0A0A14".toColorInt(), // Very dark blue-black
-                    "#0A1A30".toColorInt()  // Dark blue tint
-                )
-            }
-            BreathPhase.EXHALE, BreathPhase.HOLD2 -> {
-                Pair(
-                    "#0A0A14".toColorInt(), // Very dark blue-black
-                    "#0A2414".toColorInt()  // Dark green tint
-                )
-            }
-            else -> {
-                Pair(
-                    "#0A0A14".toColorInt(), // Very dark blue-black
-                    "#121218".toColorInt()  // Slightly lighter dark
-                )
-            }
         }
     }
 
