@@ -64,4 +64,7 @@
     <string name="accessibility_expand_dropdown">Expand dropdown</string>
     <string name="accessibility_cycles_slider">Adjust number of cycles</string>
 
+    <string name="widget_default_message">Take a moment to breathe and stay mindful</string>
+    <string name="breathe_now">BREATHE NOW</string>
+
 </resources>

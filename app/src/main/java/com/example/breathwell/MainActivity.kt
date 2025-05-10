@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
@@ -89,6 +91,18 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState != null) {
             activeFragment = savedInstanceState.getInt("activeFragment", NO_FRAGMENT)
             updateUIForActiveFragment()
+        }
+
+        // Check if this activity was started from widget to start breathing
+        if (intent?.action == "com.example.breathwell.START_BREATHING") {
+            // Make sure we're on main screen
+            hideAllFragments()
+
+            // Use a slight delay to ensure UI is ready before starting
+            Handler(Looper.getMainLooper()).postDelayed({
+                // Start breathing session
+                viewModel.toggleBreathing()
+            }, 500)
         }
     }
 

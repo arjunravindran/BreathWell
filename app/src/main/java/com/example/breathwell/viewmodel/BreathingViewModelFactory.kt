@@ -12,8 +12,9 @@ class BreathingViewModelFactory(private val application: Application) : ViewMode
         if (modelClass.isAssignableFrom(BreathingViewModel::class.java)) {
             val database = AppDatabase.getDatabase(application)
             val repository = BreathingSessionRepository(database.breathingSessionDao())
+
             @Suppress("UNCHECKED_CAST")
-            return BreathingViewModel(repository) as T
+            return BreathingViewModel(application, repository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

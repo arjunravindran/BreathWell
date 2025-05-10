@@ -21,6 +21,10 @@ interface BreathingSessionDao {
     @Query("SELECT DISTINCT date FROM breathing_sessions WHERE completed = 1")
     fun getAllCompletedDates(): LiveData<List<LocalDate>>
 
+    // Add this new method for the widget to use
+    @Query("SELECT DISTINCT date FROM breathing_sessions WHERE completed = 1")
+    fun getAllCompletedDatesSync(): List<LocalDate>
+
     @Query("SELECT COUNT(*) FROM breathing_sessions WHERE completed = 1 AND date BETWEEN :startDate AND :endDate")
     fun getCompletionCountForRange(startDate: LocalDate, endDate: LocalDate): LiveData<Int>
 }

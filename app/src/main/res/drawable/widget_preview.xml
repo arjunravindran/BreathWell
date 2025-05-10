@@ -1,0 +1,29 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="110dp"
+    android:height="60dp"
+    android:viewportWidth="110"
+    android:viewportHeight="60">
+
+    <!-- Blue gradient background -->
+    <path
+        android:fillColor="#00A6ED"
+        android:pathData="M0,0h110v60h-110z" />
+
+    <!-- Streak flame and number -->
+    <path
+        android:fillColor="#FFC107"
+        android:pathData="M20,15a10,10 0,1 0,0 10a10,10 0,1 0,0 -10z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M35,20h10v10h-10z" />
+
+    <!-- Message text -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M20,35h70v5h-70z" />
+
+    <!-- HAL eye partial -->
+    <path
+        android:fillColor="#38E1FF"
+        android:pathData="M80,60a20,20 0,0 0,20 -20a20,20 0,0 0,-20 -20v20z" />
+</vector>

@@ -1,12 +1,14 @@
 package com.example.breathwell.viewmodel
 
 import android.animation.ValueAnimator
+import android.app.Application
+import android.content.Context
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.core.graphics.toColorInt
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.example.breathwell.data.entity.BreathingSession
@@ -15,13 +17,15 @@ import com.example.breathwell.model.BreathPhase
 import com.example.breathwell.model.BreathingPattern
 import com.example.breathwell.utils.CountdownController
 import com.example.breathwell.utils.PowerSavingMode
+import com.example.breathwell.widget.WidgetHelper
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 class BreathingViewModel(
+    application: Application,
     private val repository: BreathingSessionRepository,
     private val savedStateHandle: SavedStateHandle = SavedStateHandle()
-) : ViewModel(), CountdownController.CountdownListener {
+) : AndroidViewModel(application), CountdownController.CountdownListener {
 
     // Keys for saved state
     private companion object {
@@ -280,6 +284,9 @@ class BreathingViewModel(
 
         // Update session completed status
         _sessionCompleted.value = true
+
+        // Update app widgets to reflect new streak
+        updateWidgets(getApplication())
     }
 
     private fun saveSessionToDatabase() {
@@ -301,6 +308,13 @@ class BreathingViewModel(
             )
             repository.insertSession(session)
         }
+    }
+
+    /**
+     * Updates the app widgets when a session is completed
+     */
+    private fun updateWidgets(context: Context) {
+        WidgetHelper.updateWidgets(context)
     }
 
     private fun advanceToNextPhase() {
