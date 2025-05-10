@@ -8,9 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import com.example.breathwell.MainActivity
 import com.example.breathwell.R
 import com.example.breathwell.databinding.ActivityMainBinding
 import com.example.breathwell.model.BreathPhase
@@ -46,6 +48,15 @@ class BreathingUIController(
 
             override fun onNothingSelected(parent: AdapterView<*>) {
                 // Do nothing
+            }
+        }
+
+        // Set up info button to show technique details
+        val infoButton = getCurrentInfoButton()
+        infoButton.setOnClickListener {
+            val currentPattern = viewModel.activePattern.value
+            currentPattern?.let {
+                (activity as MainActivity).showTechniqueInfoFragment(it.name)
             }
         }
     }
@@ -352,7 +363,7 @@ class BreathingUIController(
     }
 
     // Helper methods to get the current UI component based on visible layout
-    fun getCurrentHALCircleView() = when {
+    private fun getCurrentHALCircleView() = when {
         binding.breathingContent.root.isVisible -> binding.breathingContent.halCircleView
         else -> binding.breathingContentLand.halCircleView
     }
@@ -360,6 +371,13 @@ class BreathingUIController(
     private fun getCurrentPatternSpinner() = when {
         binding.breathingContent.root.isVisible -> binding.breathingContent.patternSpinnerView
         else -> binding.breathingContentLand.patternSpinnerView
+    }
+
+    private fun getCurrentInfoButton(): ImageButton {
+        return when {
+            binding.breathingContent.root.isVisible -> binding.breathingContent.infoButton
+            else -> binding.breathingContentLand.infoButton
+        }
     }
 
     private fun getCurrentCyclesSlider() = when {
@@ -417,7 +435,10 @@ class BreathingUIController(
                 R.layout.item_spinner_dropdown, parent, false
             )
             val pattern = getItem(position)
+
             view.findViewById<TextView>(R.id.spinnerText).text = pattern?.name
+            view.findViewById<TextView>(R.id.spinnerDescription).text = pattern?.description
+
             return view
         }
 

@@ -75,7 +75,8 @@ class BreathingViewModel(
             savedStateHandle[KEY_CUSTOM_INHALE] ?: 4,
             savedStateHandle[KEY_CUSTOM_HOLD1] ?: 4,
             savedStateHandle[KEY_CUSTOM_EXHALE] ?: 4,
-            savedStateHandle[KEY_CUSTOM_HOLD2] ?: 2
+            savedStateHandle[KEY_CUSTOM_HOLD2] ?: 2,
+            "Create your own custom breathing pattern with personalized timings."
         )
     )
     val customPattern = _customPattern
@@ -464,7 +465,8 @@ class BreathingViewModel(
             inhale.coerceIn(1, 10),
             hold1.coerceIn(0, 10),
             exhale.coerceIn(1, 10),
-            hold2.coerceIn(0, 10)
+            hold2.coerceIn(0, 10),
+            "Create your own custom breathing pattern with personalized timings."
         )
         _customPattern.value = updated
 

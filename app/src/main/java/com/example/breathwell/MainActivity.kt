@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -40,8 +39,27 @@ class MainActivity : AppCompatActivity() {
         const val SETTINGS_FRAGMENT = 1
         const val HABIT_TRACKER_FRAGMENT = 2
         const val REMINDER_SETTINGS_FRAGMENT = 3
+        const val TECHNIQUE_INFO_FRAGMENT = 4  // Add this line
     }
 
+    fun showTechniqueInfoFragment(patternName: String) {
+        if (viewModel.isRunning.value == true) {
+            viewModel.toggleBreathing() // Stop the session first
+        }
+
+        // Clear backstack and hide any existing fragments
+        clearBackStackAndFragments()
+
+        hideBreathingContent()
+
+        val techniqueInfoFragment = TechniqueInfoFragment.newInstance(patternName)
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.contentContainer, techniqueInfoFragment)
+            .addToBackStack("technique_info")
+            .commit()
+
+        activeFragment = TECHNIQUE_INFO_FRAGMENT
+    }
     // Track current active fragment
     private var activeFragment = NO_FRAGMENT
 
@@ -126,18 +144,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         // For Android 13+ request notification permissions
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                    PERMISSION_REQUEST_CODE
-                )
-            }
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                PERMISSION_REQUEST_CODE
+            )
         }
     }
 
@@ -368,17 +384,20 @@ class MainActivity : AppCompatActivity() {
                 binding.settingsIcon.setImageResource(R.drawable.ic_settings)
                 binding.habitTrackerIcon.setImageResource(R.drawable.ic_calendar)
             }
+
             SETTINGS_FRAGMENT -> {
                 hideBreathingContent()
                 binding.settingsIcon.setImageResource(R.drawable.ic_close)
                 binding.habitTrackerIcon.setImageResource(R.drawable.ic_calendar)
             }
+
             HABIT_TRACKER_FRAGMENT -> {
                 hideBreathingContent()
                 binding.settingsIcon.setImageResource(R.drawable.ic_settings)
                 binding.habitTrackerIcon.setImageResource(R.drawable.ic_close)
             }
-            REMINDER_SETTINGS_FRAGMENT -> {
+
+            REMINDER_SETTINGS_FRAGMENT, TECHNIQUE_INFO_FRAGMENT -> {
                 hideBreathingContent()
             }
         }
