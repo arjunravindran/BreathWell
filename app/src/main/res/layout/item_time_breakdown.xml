@@ -1,0 +1,54 @@
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp">
+
+    <TextView
+        android:id="@+id/timeName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/timeCount"
+        app:layout_constraintWidth_percent="0.6"
+        tools:text="Morning" />
+
+    <TextView
+        android:id="@+id/timeCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/gray_500"
+        android:textSize="14sp"
+        android:textAlignment="textEnd"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/timeName"
+        app:layout_constraintBottom_toBottomOf="@id/timeName"
+        tools:text="3 (25%)" />
+
+    <!-- Progress background -->
+    <View
+        android:id="@+id/timeProgressBackground"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_marginTop="8dp"
+        android:background="#1AFFFFFF"
+        app:layout_constraintTop_toBottomOf="@id/timeName" />
+
+    <!-- Progress bar -->
+    <View
+        android:id="@+id/timeProgress"
+        android:layout_width="100dp"
+        android:layout_height="4dp"
+        android:background="@color/time_morning"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/timeProgressBackground"
+        tools:layout_width="60dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

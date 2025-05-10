@@ -1,0 +1,6 @@
+<resources>
+    <color name="time_morning">#FFC107</color>
+    <color name="time_afternoon">#FF9800</color>
+    <color name="time_evening">#3F51B5</color>
+    <color name="time_night">#6200EA</color>
+</resources>

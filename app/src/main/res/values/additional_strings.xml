@@ -1,0 +1,56 @@
+<resources>
+    <!-- Common strings -->
+    <string name="today">Today</string>
+    <string name="summary">Summary</string>
+    <string name="status">Status</string>
+    <string name="consistency">Consistency</string>
+    <string name="duration">Duration</string>
+    <string name="difficulty">Difficulty</string>
+    <string name="all">All</string>
+    <string name="featured">Featured</string>
+    <string name="in_progress">In Progress</string>
+    <string name="expand">Expand</string>
+    <string name="cancel">Cancel</string>
+    <string name="restart">Restart</string>
+
+    <!-- Analytics-specific strings -->
+    <string name="date_range_format">%1$s to %2$s</string>
+    <string name="no_data">No data</string>
+    <string name="no_sessions_today">No breathing sessions completed today</string>
+    <string name="percentage_format">%d%%</string>
+    <string name="technique_count_format">%1$d (%2$d%%)</string>
+
+    <!-- Programs-specific strings -->
+    <string name="program_schedule">Program Schedule</string>
+    <string name="no_programs">No programs</string>
+    <string name="no_programs_found">No programs found in this category</string>
+    <string name="restart_program_title">Restart Program?</string>
+    <string name="restart_program_message">This will reset your progress in this program and start you from the beginning. Are you sure you want to restart?</string>
+    <string name="green_500">Green 500</string>
+
+    <!-- Plurals for program days and sessions -->
+    <plurals name="cycles">
+        <item quantity="one">%d Cycle</item>
+        <item quantity="other">%d Cycles</item>
+    </plurals>
+
+    <plurals name="days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+
+    <plurals name="sessions">
+        <item quantity="one">%d session</item>
+        <item quantity="other">%d sessions</item>
+    </plurals>
+
+    <plurals name="session_seconds">
+        <item quantity="one">%d second</item>
+        <item quantity="other">%d seconds</item>
+    </plurals>
+
+    <plurals name="minutes">
+        <item quantity="one">%d minute</item>
+        <item quantity="other">%d minutes</item>
+    </plurals>
+</resources>

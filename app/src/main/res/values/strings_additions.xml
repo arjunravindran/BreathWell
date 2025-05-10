@@ -1,0 +1,86 @@
+<resources>
+    <!-- New strings for expanded breathing techniques -->
+    <string name="breathing_techniques">Breathing Techniques</string>
+    <string name="technique_details">Technique Details</string>
+    <string name="back">Back</string>
+    <string name="empty_techniques">No techniques</string>
+    <string name="no_techniques_found">No techniques found for this category</string>
+    <string name="pattern">Pattern:</string>
+    <string name="view_details">View details</string>
+    <string name="description">Description</string>
+    <string name="benefits">Benefits</string>
+    <string name="breathing_pattern">Breathing Pattern</string>
+    <string name="start_session">Start Session</string>
+    <string name="add_to_favorites">Add to Favorites</string>
+    <string name="remove_from_favorites">Remove from Favorites</string>
+    <string name="difficulty_level">Difficulty Level</string>
+    <string name="difficulty_beginner">Beginner</string>
+    <string name="difficulty_intermediate">Intermediate</string>
+    <string name="difficulty_advanced">Advanced</string>
+    <string name="hold_2">Hold 2</string>
+    <string name="no_hold">No hold</string>
+
+    <!-- Plurals for time durations -->
+    <plurals name="seconds">
+        <item quantity="one">%d second</item>
+        <item quantity="other">%d seconds</item>
+    </plurals>
+
+    <plurals name="seconds_per_cycle">
+        <item quantity="one">%d second per cycle</item>
+        <item quantity="other">%d seconds per cycle</item>
+    </plurals>
+
+    <!-- Guided Audio feature strings -->
+    <string name="audio_guidance">Audio Guidance</string>
+    <string name="enable_audio_guidance">Enable Audio Guidance</string>
+    <string name="voice_selection">Voice Selection</string>
+    <string name="voice_standard">Standard Voice</string>
+    <string name="voice_calm">Calm Voice</string>
+    <string name="voice_energetic">Energetic Voice</string>
+    <string name="voice_settings">Voice Settings</string>
+    <string name="speech_rate">Speech Rate</string>
+    <string name="speech_volume">Voice Volume</string>
+    <string name="voice_preview">Preview Voice</string>
+    <string name="voice_preview_text">This is how your breathing guide will sound.</string>
+
+    <!-- Breathing Analytics feature strings -->
+    <string name="analytics">Analytics</string>
+    <string name="breathing_analytics">Breathing Analytics</string>
+    <string name="session_history">Session History</string>
+    <string name="weekly_summary">Weekly Summary</string>
+    <string name="monthly_summary">Monthly Summary</string>
+    <string name="total_sessions">Total Sessions</string>
+    <string name="total_minutes">Total Minutes</string>
+    <string name="average_duration">Average Duration</string>
+    <string name="longest_streak">Longest Streak</string>
+    <string name="favorite_technique">Favorite Technique</string>
+    <string name="most_consistent">Most Consistent</string>
+    <string name="sessions_by_technique">Sessions by Technique</string>
+    <string name="sessions_by_time">Sessions by Time of Day</string>
+    <string name="morning">Morning</string>
+    <string name="afternoon">Afternoon</string>
+    <string name="evening">Evening</string>
+    <string name="night">Night</string>
+    <string name="minutes">%d min</string>
+    <string name="session_date_format">EEE, MMM d</string>
+    <string name="no_data_available">No data available yet</string>
+    <string name="start_breathing">Start breathing to see your analytics</string>
+
+    <!-- Guided Programs feature strings -->
+    <string name="guided_programs">Guided Programs</string>
+    <string name="program_details">Program Details</string>
+    <string name="sessions">%d sessions</string>
+    <string name="program_complete">Program Complete</string>
+    <string name="program_in_progress">In Progress</string>
+    <string name="program_not_started">Not Started</string>
+    <string name="start_program">Start Program</string>
+    <string name="continue_program">Continue Program</string>
+    <string name="restart_program">Restart Program</string>
+    <string name="day_x">Day %d</string>
+    <string name="session_x">Session %d</string>
+    <string name="program_progress">Program Progress</string>
+    <string name="locked">Locked</string>
+    <string name="unlocked">Unlocked</string>
+    <string name="completed">Completed</string>
+</resources>

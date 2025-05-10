@@ -26,4 +26,34 @@ class BreathingSessionRepository(private val breathingSessionDao: BreathingSessi
     suspend fun insertSession(session: BreathingSession): Long {
         return breathingSessionDao.insertSession(session)
     }
+
+    // New analytics methods
+
+    fun getSessionsForDateRange(startDate: LocalDate, endDate: LocalDate): LiveData<List<BreathingSession>> {
+        return breathingSessionDao.getSessionsForDateRange(startDate, endDate)
+    }
+
+    fun getTotalDaysWithSessions(): LiveData<Int> {
+        return breathingSessionDao.getTotalDaysWithSessions()
+    }
+
+    fun getTotalCompletedSessions(): LiveData<Int> {
+        return breathingSessionDao.getTotalCompletedSessions()
+    }
+
+    fun getTotalDuration(): LiveData<Int> {
+        return breathingSessionDao.getTotalDuration()
+    }
+
+    fun getMostUsedPattern(): LiveData<BreathingSessionDao.PatternUsage> {
+        return breathingSessionDao.getMostUsedPattern()
+    }
+
+    fun getPatternUsage(): LiveData<List<BreathingSessionDao.PatternUsage>> {
+        return breathingSessionDao.getPatternUsage()
+    }
+
+    fun getLongestStreak(): LiveData<Int> {
+        return breathingSessionDao.getLongestStreak()
+    }
 }

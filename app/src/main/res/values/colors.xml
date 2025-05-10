@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="gray_950">#121212</color>
     <color name="gray_900">#181818</color>
@@ -10,7 +9,7 @@
     <color name="cyan_400">#38E1FF</color>
     <color name="cyan_500">#00D4FF</color>
     <color name="cyan_gradient_start">#3D7DDFFF</color>
-
+    <color name="green_500">#4CAF50</color>
     <color name="red_500">#FF5252</color>
 
 </resources>

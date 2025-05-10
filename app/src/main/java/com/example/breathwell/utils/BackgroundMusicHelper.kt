@@ -60,7 +60,7 @@ class BackgroundMusicHelper(private val context: Context) : DefaultLifecycleObse
     /**
      * Pause music playback
      */
-    private fun pause() {
+    fun pause() {
         try {
             mediaPlayer?.let {
                 if (it.isPlaying) {

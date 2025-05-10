@@ -1,0 +1,349 @@
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_background"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="24dp">
+
+        <!-- Header with back button -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/headerLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <ImageButton
+                android:id="@+id/backButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_chevron_left"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/back"
+                app:tint="@color/white"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+            <TextView
+                android:id="@+id/screenTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/technique_details"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:fontFamily="sans-serif-light"
+                app:layout_constraintStart_toEndOf="@id/backButton"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Technique name and favorite button -->
+        <TextView
+            android:id="@+id/techniqueName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/headerLayout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/favoriteButton"
+            tools:text="Box Breathing" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/favoriteButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            app:icon="@drawable/ic_favorite_outline"
+            app:iconTint="@color/white"
+            android:insetLeft="0dp"
+            android:insetTop="0dp"
+            android:insetRight="0dp"
+            android:insetBottom="0dp"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            android:padding="12dp"
+            app:backgroundTint="#33000000"
+            app:cornerRadius="24dp"
+            android:contentDescription="@string/add_to_favorites"
+            app:layout_constraintTop_toTopOf="@id/techniqueName"
+            app:layout_constraintBottom_toBottomOf="@id/techniqueName"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Category and difficulty info -->
+        <TextView
+            android:id="@+id/categoryName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/cyan_400"
+            android:textSize="14sp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:background="@drawable/pill_background"
+            app:layout_constraintTop_toBottomOf="@id/techniqueName"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="Stress Reduction" />
+
+        <TextView
+            android:id="@+id/difficultyIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textColor="#B0FFFFFF"
+            android:textSize="14sp"
+            app:layout_constraintTop_toTopOf="@id/categoryName"
+            app:layout_constraintBottom_toBottomOf="@id/categoryName"
+            app:layout_constraintStart_toEndOf="@id/categoryName"
+            tools:text="Beginner" />
+
+        <!-- Description -->
+        <TextView
+            android:id="@+id/descriptionLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/description"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/categoryName"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/techniqueDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="#E0FFFFFF"
+            android:textSize="14sp"
+            app:layout_constraintTop_toBottomOf="@id/descriptionLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="Classic technique used by Navy SEALs and stress management experts. Visualize tracing the four sides of a square as you breathe." />
+
+        <!-- Benefits -->
+        <TextView
+            android:id="@+id/benefitsLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/benefits"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/techniqueDescription"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/techniqueBenefits"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="#E0FFFFFF"
+            android:textSize="14sp"
+            app:layout_constraintTop_toBottomOf="@id/benefitsLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="Reduces stress, improves concentration, and regulates the autonomic nervous system." />
+
+        <!-- Pattern visualization -->
+        <TextView
+            android:id="@+id/patternLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/breathing_pattern"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/techniqueBenefits"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/cycleDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#B0FFFFFF"
+            android:textSize="14sp"
+            app:layout_constraintTop_toTopOf="@id/patternLabel"
+            app:layout_constraintBottom_toBottomOf="@id/patternLabel"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="16 seconds/cycle" />
+
+        <!-- Pattern visualization bars -->
+        <LinearLayout
+            android:id="@+id/patternVisualizationLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/patternLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <!-- Inhale -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:id="@+id/inhaleLabel"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/inhale"
+                    android:textColor="#B0FFFFFF"
+                    android:textSize="14sp" />
+
+                <View
+                    android:id="@+id/inhaleBar"
+                    android:layout_width="120dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/inhale_bar_background"
+                    tools:layout_width="120dp" />
+
+                <TextView
+                    android:id="@+id/inhaleValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    tools:text="4 seconds" />
+            </LinearLayout>
+
+            <!-- Hold 1 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:id="@+id/hold1Label"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/hold"
+                    android:textColor="#B0FFFFFF"
+                    android:textSize="14sp" />
+
+                <View
+                    android:id="@+id/hold1Bar"
+                    android:layout_width="120dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/hold1_bar_background"
+                    tools:layout_width="120dp" />
+
+                <TextView
+                    android:id="@+id/hold1Value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    tools:text="4 seconds" />
+            </LinearLayout>
+
+            <!-- Exhale -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:id="@+id/exhaleLabel"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/exhale"
+                    android:textColor="#B0FFFFFF"
+                    android:textSize="14sp" />
+
+                <View
+                    android:id="@+id/exhaleBar"
+                    android:layout_width="120dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/exhale_bar_background"
+                    tools:layout_width="120dp" />
+
+                <TextView
+                    android:id="@+id/exhaleValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    tools:text="4 seconds" />
+            </LinearLayout>
+
+            <!-- Hold 2 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/hold2Label"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/hold_2"
+                    android:textColor="#B0FFFFFF"
+                    android:textSize="14sp" />
+
+                <View
+                    android:id="@+id/hold2Bar"
+                    android:layout_width="120dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/hold2_bar_background"
+                    tools:layout_width="120dp" />
+
+                <TextView
+                    android:id="@+id/hold2Value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    tools:text="4 seconds" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Start session button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/startSessionButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="@string/start_session"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            app:cornerRadius="16dp"
+            app:backgroundTint="@color/cyan_gradient_start"
+            app:layout_constraintTop_toBottomOf="@id/patternVisualizationLayout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>

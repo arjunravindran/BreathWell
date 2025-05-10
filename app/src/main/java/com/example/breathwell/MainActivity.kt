@@ -40,10 +40,15 @@ class MainActivity : AppCompatActivity() {
         const val SETTINGS_FRAGMENT = 1
         const val HABIT_TRACKER_FRAGMENT = 2
         const val REMINDER_SETTINGS_FRAGMENT = 3
+        const val BREATHING_TECHNIQUES_FRAGMENT = 4
+        const val BREATHING_DETAIL_FRAGMENT = 5
+        const val ANALYTICS_FRAGMENT = 6
+        const val PROGRAMS_FRAGMENT = 7
+        const val PROGRAM_DETAIL_FRAGMENT = 8
     }
 
     // Track current active fragment
-    private var activeFragment = NO_FRAGMENT
+    var activeFragment = NO_FRAGMENT
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
